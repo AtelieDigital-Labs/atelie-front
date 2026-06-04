@@ -1,10 +1,21 @@
 
+import { Button } from "./components/ui/Button/Button"
+
 function App() {
 
   return (
-    <button className="bg-background text-primary px-4 py-2 border-primary">
-      Teste
-    </button>
+    <div className="m-3">
+      <h1>Atelie Digital</h1>
+    
+      <Button variant="primary">
+        Cadastrar
+      </Button>
+
+      <Button variant="success">
+        Confirmar
+      </Button>
+    </div>
+   
   )
 }
 
