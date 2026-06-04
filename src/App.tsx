@@ -1,11 +1,10 @@
 
 function App() {
 
-
   return (
-    <>
-     <h1>Ateliê Digital</h1>
-    </>
+    <button className="bg-background text-primary px-4 py-2 border-primary">
+      Teste
+    </button>
   )
 }
 
