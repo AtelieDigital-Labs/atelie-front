@@ -1,19 +1,10 @@
 
-import { Button } from "./components/ui/Button/Button"
-
+import { Search } from "./components/ui/Serach"
 function App() {
 
   return (
-    <div className="m-3">
-      <h1>Atelie Digital</h1>
-    
-      <Button variant="primary">
-        Cadastrar
-      </Button>
-
-      <Button variant="success">
-        Confirmar
-      </Button>
+    <div className="p-10">
+        <Search/>
     </div>
    
   )

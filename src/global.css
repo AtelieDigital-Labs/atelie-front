@@ -1,29 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand */
   --color-primary: #9E502B;
   --color-primary-dark: #BC633D;
 
-  /* Secondary */
   --color-secondary: #2E536E;
   --color-secondary-light: #4A7A9F;
 
-  /* Success */
   --color-success: #3A8C5E;
   --color-success-dark: #1C5738;
 
-  /* Danger */
   --color-danger: #D14343;
   --color-danger-dark: #B12F2F;
 
-  /* Warning */
   --color-warning: #C89E3A;
 
-  /* Highlight */
   --color-highlight: #E27C6A;
 
-  /* Neutrals */
   --color-background: #FFFFFF;
   --color-surface: #F9F5F1;
   --color-card: #F7F1EB;
@@ -31,20 +24,18 @@
   --color-text: #1E1E1E;
   --color-gray: #363636;
 
-  /* fontes */
   --font-title: "Playfair Display", serif;
   --font-body: system-ui, sans-serif;
 }
 
-
-@layer base{
+@layer base {
   body {
+    @apply bg-surface text-text;
     font-family: var(--font-body);
   }
 
   h1,h2,h3,h4,h5,h6 {
     font-family: var(--font-title);
-    font-weight: 700;
-    color: var(--color-primary);  
+    color: var(--color-primary);
   }
 }
