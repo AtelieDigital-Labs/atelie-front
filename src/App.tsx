@@ -1,11 +1,14 @@
 
-import { Search } from "./components/ui/Serach"
+import { Header } from "./components/Header"
 function App() {
 
   return (
-    <div className="p-10">
-        <Search/>
-    </div>
+   <div>
+     <Header/>
+
+   </div>
+    
+ 
    
   )
 }
