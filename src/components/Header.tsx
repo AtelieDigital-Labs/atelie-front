@@ -1,4 +1,4 @@
-import { ShoppingCart, Heart, Store, User, ChevronDown } from 'lucide-react'
+import { ShoppingCart, Heart, Store, User, ChevronDown, Menu } from 'lucide-react'
 import { Search } from './ui/Search'
 
 type HeaderProps = {
@@ -11,10 +11,19 @@ const NAV_ICONS = [
   { icon: Store,        label: 'Lojas' },
 ]
 
+const CATEGORIES = [
+  'Moda',
+  'Casa e decorações',
+  'Casamento',
+  'Festas',
+  'Acessórios',
+]
+
+
 export function Header({ username = 'Usuário' }: HeaderProps) {
   return (
-    <header className="bg-card border-b-2 border-primary/20">
-      <div className="mx-auto px-4 lg:px-8">
+    <header className="bg-card border-b-2 border-primary/20 ">
+      <div className="container-app mx-auto px-4 lg:px-8">
 
         <div className="grid grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto] items-center gap-4 py-3">
 
@@ -50,7 +59,38 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
           </div>
 
         </div>
+
+      
+
       </div>
+
+        {/* Navbar de categorias */}
+      <nav className="bg-primary  ">
+        <div className="container-app">
+          <ul className="flex items-center justify-between overflow-x-auto scrollbar-hide py-2.5 ">
+
+            <li className="shrink-0">
+              <button className="flex items-center gap-2 text-white/90 hover:text-white text-sm px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                <Menu size={16} />
+                <span>Categorias</span>
+              </button>
+            </li>
+
+            
+
+            {CATEGORIES.map(category => (
+              <li key={category} className="shrink-0">
+                <button className="text-white/90 hover:text-white text-sm px-4 py-1.5 rounded-md hover:bg-white/10 transition-colors whitespace-nowrap">
+                  {category}
+                </button>
+              </li>
+            ))}
+
+          </ul>
+        </div>
+      </nav>
+
+
     </header>
   )
 }
