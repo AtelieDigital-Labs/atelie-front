@@ -27,7 +27,7 @@ export function FavoriteButton({initialFavorite = false, onChange}: FavoriteButt
     >
       
     <Heart
-      size={16}
+      size={24}
       className={favorited ? 'text-primary fill-primary' : 'text-primary'}
     />  
     
