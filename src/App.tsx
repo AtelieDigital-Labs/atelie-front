@@ -1,6 +1,6 @@
 
 import { Header } from "./components/Header"
-
+import {Footer} from  './components/Footer'
 import { ProductCard } from "./components/ui/ProductCard"
 import {type Product} from './dtos/product'
 
@@ -133,12 +133,13 @@ function App() {
   return (
    <div>
      <Header/>
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 ">
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
        {MOCK_PRODUCTS.map(product => (
       <ProductCard key={product.id} product={product} />
     ))}
      </div>
-   
+    
+    <Footer/>
     
    </div>
     
