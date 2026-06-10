@@ -5,11 +5,14 @@ import App from './App.tsx'
 import './global.css'
 
 import { ThemeProvider } from './providers/theme-provider.tsx'
+import {AuthProvider} from './providers/authProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-    <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
 )
