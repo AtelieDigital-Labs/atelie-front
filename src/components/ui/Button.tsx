@@ -1,6 +1,6 @@
 interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'danger'
+  variant?: 'primary' | 'secondary' | 'success' | 'danger'| 'warning'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'icon'
   fullWidth?: boolean
 }
@@ -10,6 +10,7 @@ const variants = {
   secondary: 'bg-secondary hover:bg-secondary-light text-white',
   success: 'bg-success hover:bg-success-dark text-white',
   danger: 'bg-danger hover:bg-danger-dark text-white',
+  warning: 'bg-warning text-white',
 }
 
 const sizes = {
@@ -37,7 +38,7 @@ export function Button({
         justify-center
         gap-2
         whitespace-nowrap
-        rounded-md
+        rounded-full
         font-medium
         transition-colors
         cursor-pointer

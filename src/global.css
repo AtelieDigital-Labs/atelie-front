@@ -16,6 +16,7 @@
   --color-warning: #C89E3A;
 
   --color-highlight: #E27C6A;
+  --color-base:#f1e2cf;
 
   --color-background: #FFFFFF;
   --color-surface: #F9F5F1;
@@ -23,6 +24,7 @@
 
   --color-text: #1E1E1E;
   --color-gray: #363636;
+  
 
   --font-title: "Playfair Display", serif;
   --font-body: system-ui, sans-serif;
@@ -38,4 +40,20 @@
     font-family: var(--font-title);
     color: var(--color-primary);
   }
+}
+
+@layer components {
+  .container-app {
+    @apply mx-auto w-full max-w-screen-2xl px-4 lg:px-8;
+  }
+}
+
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
