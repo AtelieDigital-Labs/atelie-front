@@ -35,4 +35,8 @@ export type Product = {
   deliveryDate?: string
   freeShipping?: boolean
   fastDelivery?: boolean
+
+  // Detalhes do produto - acrecentar no back, caso não tenha 
+  highlights?: string[]
+  about?: string
 }
