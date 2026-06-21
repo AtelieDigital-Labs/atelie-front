@@ -1,8 +1,9 @@
 import { BrowserRouter } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { AppRoutes } from './AppRoutes'
+import {AuthRoutes} from './Auth-routes'
 
-export function Routes() {
+export function Router() {
   const { user, isLoading } = useAuth()
 
   if (isLoading) return <div>Carregando...</div>
@@ -10,7 +11,8 @@ export function Routes() {
   // por enquanto só AppRoutes — client/artisan depois
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AppRoutes />  
+      <AuthRoutes/>
     </BrowserRouter>
   )
 }

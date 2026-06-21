@@ -1,6 +1,6 @@
 import { Stars } from './Stars'
 import { FavoriteButton } from './FavoriteButton'
-import { type Product, type ProductVariation } from '../../dtos/product'
+import { type Product, type ProductVariation } from '../../schemas/product'
 import {Button} from './Button'
 import { Link } from 'react-router-dom'
 
