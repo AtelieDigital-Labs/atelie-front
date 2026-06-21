@@ -1,9 +1,25 @@
-import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Input } from '../../components/ui/input'
 import { Button } from '../../components/ui/Button'
 import { ButtonGoogle } from '../../components/ui/GoogleButton'
 import logo from '../../assets/logo-creme.svg'
+
+// Schema de validação
+const signInSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: 'Email é obrigatório' })
+    .pipe(z.email({ message: 'Email inválido' })),
+  password: z
+    .string()
+    .min(1, { message: 'Senha é obrigatória' })
+    .min(6, { message: 'Senha deve ter pelo menos 6 caracteres' }),
+})
+
+type SignInData = z.infer<typeof signInSchema>
 
 const MOCK_USER = {
   email: 'valdivania@email.com',
@@ -12,27 +28,35 @@ const MOCK_USER = {
 
 export function SignIn() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignInData>({
+    resolver: zodResolver(signInSchema),
+  })
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-
-    if (email === MOCK_USER.email && password === MOCK_USER.password) {
-      localStorage.setItem('user', JSON.stringify({ email, name: 'Valdivania', role: 'cliente' }))
+  async function onSubmit(data: SignInData) {
+    // Simula delay da API
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    if (data.email === MOCK_USER.email && data.password === MOCK_USER.password) {
+      localStorage.setItem('user', JSON.stringify({ 
+        email: data.email, 
+        name: 'Valdivania', 
+        role: 'cliente' 
+      }))
       navigate('/')
     } else {
-      setError('Email ou senha incorretos.')
+      throw new Error('Email ou senha incorretos.')
     }
   }
 
   return (
     <div className="min-h-screen flex">
-
-      <div className="flex-1 flex items-center justify-center px-8 py-12 ">
-        <div className="w-full max-w-md flex flex-col gap-6 max-w-2xl mx-auto">
+      <div className="flex-1 flex items-center justify-center px-8 py-12">
+        <div className="w-full max-w-md flex flex-col gap-6">
           
           <div className="text-center">
             <h1 className="font-title text-3xl font-bold text-text">
@@ -43,25 +67,22 @@ export function SignIn() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
             <Input
               label="Email"
               type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
               placeholder="exemplo@gmail.com"
-              required
+              error={errors.email?.message}
+              {...register('email')}
             />
 
             <div className="flex flex-col gap-1.5">
               <Input
                 type="password"
                 label="Senha"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
-                required
-                error={error}
+                error={errors.password?.message}
+                {...register('password')}
               />
               <Link 
                 to="/forgot-password" 
@@ -75,8 +96,9 @@ export function SignIn() {
               type="submit" 
               fullWidth 
               variant="primary"
+              disabled={isSubmitting}
             >
-              Acessar
+              {isSubmitting ? 'Entrando...' : 'Acessar'}
             </Button>
           </form>
 
@@ -97,13 +119,12 @@ export function SignIn() {
         </div>
       </div>
 
-      
       <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-12">
-        <div className="text-center ">
+        <div className="text-center max-w-2xl mx-auto">
           <img 
             src={logo} 
             alt="Ateliê Digital" 
-            className="max-w-xs mx-auto max-w-2xl mx-auto "
+            className="max-w-xs mx-auto"
           />
         </div>
       </div>
