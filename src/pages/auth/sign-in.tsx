@@ -1,25 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { signInSchema, type SignInPayload } from '../../schemas/auth'
 import { Input } from '../../components/ui/input'
 import { Button } from '../../components/ui/Button'
 import { ButtonGoogle } from '../../components/ui/GoogleButton'
 import logo from '../../assets/logo-creme.svg'
 
-// Schema de validação
-const signInSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Email é obrigatório' })
-    .pipe(z.email({ message: 'Email inválido' })),
-  password: z
-    .string()
-    .min(1, { message: 'Senha é obrigatória' })
-    .min(6, { message: 'Senha deve ter pelo menos 6 caracteres' }),
-})
 
-type SignInData = z.infer<typeof signInSchema>
+
 
 const MOCK_USER = {
   email: 'valdivania@email.com',
@@ -32,12 +21,18 @@ export function SignIn() {
   const {
     register,
     handleSubmit,
+    setError,
+    clearErrors, 
     formState: { errors, isSubmitting },
-  } = useForm<SignInData>({
+  } = useForm<SignInPayload>({
     resolver: zodResolver(signInSchema),
+     mode: 'onBlur',  // Valida quando sai do campo (padrão)
   })
 
-  async function onSubmit(data: SignInData) {
+  async function onSubmit(data: SignInPayload) {
+
+    clearErrors()
+
     // Simula delay da API
     await new Promise(resolve => setTimeout(resolve, 1000))
     
@@ -49,7 +44,10 @@ export function SignIn() {
       }))
       navigate('/')
     } else {
-      throw new Error('Email ou senha incorretos.')
+      setError('password', { 
+        type: 'manual',
+        message: 'Email ou senha incorretos.' 
+      })
     }
   }
 
