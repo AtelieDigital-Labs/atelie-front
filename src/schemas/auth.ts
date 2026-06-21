@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// User
+
 export const userSchema = z.object({
   pk: z.number(),
   email: z.string().pipe(z.email('Email inválido')),
@@ -12,7 +12,6 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>
 
-// AuthResponse
 export const authResponseSchema = z.object({
   access: z.string(),
   refresh: z.string(),
@@ -21,7 +20,7 @@ export const authResponseSchema = z.object({
 
 export type AuthResponse = z.infer<typeof authResponseSchema>
 
-// SignInPayload
+
 export const signInSchema = z.object({
   email: z
     .string()
@@ -35,19 +34,45 @@ export const signInSchema = z.object({
 
 export type SignInPayload = z.infer<typeof signInSchema>
 
-// SignUpPayload
+
 export const signUpSchema = z
   .object({
-    email: z
+    first_name: z
       .string()
-      .min(1, { message: 'Email é obrigatório' })
-      .pipe(z.email({ message: 'Email inválido' })),
+      .min(2, { message: 'Nome deve ter pelo menos 2 caracteres' }),
+    last_name: z
+      .string()
+      .min(2, { message: 'Sobrenome deve ter pelo menos 2 caracteres' }),
     username: z
       .string()
       .min(3, { message: 'Username deve ter pelo menos 3 caracteres' })
       .regex(/^[a-zA-Z0-9_]+$/, { 
         message: 'Username só pode conter letras, números e _' 
       }),
+    email: z
+      .string()
+      .min(1, { message: 'Email é obrigatório' })
+      .pipe(z.email({ message: 'Email inválido' })),
+    cpf: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine(
+        (val) => !val || val.replace(/\D/g, '').length === 11,
+        { message: 'CPF deve ter 11 dígitos' }
+      ),
+    phone_number: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine(
+        (val) => !val || val.replace(/\D/g, '').length >= 10,
+        { message: 'Telefone deve ter pelo menos 10 dígitos' }
+      ),
+    date_of_birth: z
+      .string()
+      .optional()
+      .or(z.literal('')),
     password1: z
       .string()
       .min(8, { message: 'Senha deve ter pelo menos 8 caracteres' })
@@ -60,5 +85,6 @@ export const signUpSchema = z
     message: 'As senhas não coincidem',
     path: ['password2'],
   })
+
 
 export type SignUpPayload = z.infer<typeof signUpSchema>
