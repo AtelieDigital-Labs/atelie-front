@@ -1,5 +1,7 @@
 import { ShoppingCart, Heart, Store, User, ChevronDown, Menu } from 'lucide-react'
 import { Search } from './ui/Search'
+import {useNavigate} from 'react-router-dom'
+import { useState } from 'react'
 
 type HeaderProps = {
   username?: string
@@ -12,15 +14,27 @@ const NAV_ICONS = [
 ]
 
 const CATEGORIES = [
-  'Moda',
-  'Casa e decorações',
-  'Casamento',
-  'Festas',
-  'Acessórios',
+    { label: 'Moda', value: 'moda' },
+    { label: 'Casa e decorações', value: 'casa-e-decoracoes' },
+    { label: 'Casamento', value: 'casamento' },
+    { label: 'Festas', value: 'festas' },
+    { label: 'Acessórios', value: 'acessorios' },
 ]
 
 
+
+
 export function Header({ username = 'Usuário' }: HeaderProps) {
+  const navigate = useNavigate()
+  const [query, setQuery]= useState('')
+
+  function handleSearch(e:  React.SubmitEvent<HTMLFormElement>){
+    e.preventDefault()
+    if(query.trim()){
+      navigate(`search?q=${encodeURIComponent(query.trim())}`)
+    }
+  }
+
   return (
     <header className="bg-card border-b-2 border-primary/20 ">
       <div className="container-app mx-auto px-4 lg:px-8">
@@ -54,9 +68,16 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
             </button>
           </div>
 
-          <div className="col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-1">
-            <Search />
-          </div>
+          
+          <form onSubmit={handleSearch} className="col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-1">
+            <Search 
+              value={query}
+              onChange={e=>setQuery(e.target.value)}
+            
+            />
+
+          </form>
+        
 
         </div>
 
@@ -78,10 +99,13 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
 
             
 
-            {CATEGORIES.map(category => (
-              <li key={category} className="shrink-0">
-                <button className="text-white/90 hover:text-white text-sm px-4 py-1.5 rounded-md hover:bg-white/10 transition-colors whitespace-nowrap">
-                  {category}
+            {CATEGORIES.map(cat => (
+              <li key={cat.value} className="shrink-0">
+                <button
+                  onClick={() => navigate(`/search?category=${cat.value}`)}
+                  className="text-white/90 hover:text-white text-sm px-4 py-1.5 rounded-md hover:bg-white/10 transition-colors whitespace-nowrap"
+                >
+                  {cat.label}
                 </button>
               </li>
             ))}
