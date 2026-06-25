@@ -1,6 +1,6 @@
 import { Package, AlertTriangle, Truck, DollarSign } from 'lucide-react'
 import {MetricCard} from './components/MetricCard'
-
+import {SalesChart} from './components/SalesChart'
 
 const METRICS = [
   {
@@ -46,6 +46,11 @@ export function Dashboard(){
           ))
         }
       </div>
+
+      <div>
+        <SalesChart/>
+      </div>
+
     </div>
   )
 }
