@@ -1,7 +1,8 @@
 import { BrowserRouter } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { AppRoutes } from './AppRoutes'
-import {AuthRoutes} from './Auth-routes'
+import { AppRoutes } from './app-routes'
+import {AuthRoutes} from './auth-routes'
+import {ArtisianRoutes} from './artisian-routes'
 
 export function Router() {
   const { user, isLoading } = useAuth()
@@ -13,6 +14,8 @@ export function Router() {
     <BrowserRouter>
       <AppRoutes />  
       <AuthRoutes/>
+      <ArtisianRoutes/>
+      
     </BrowserRouter>
   )
 }
