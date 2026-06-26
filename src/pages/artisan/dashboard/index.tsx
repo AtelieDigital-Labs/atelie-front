@@ -1,6 +1,7 @@
 import { Package, AlertTriangle, Truck, DollarSign } from 'lucide-react'
 import {MetricCard} from './components/MetricCard'
 import {SalesChart} from './components/SalesChart'
+import {RecentProducts} from './components/RecentProducts'
 
 const METRICS = [
   {
@@ -36,7 +37,10 @@ const METRICS = [
 export function Dashboard(){
   return (
 
+    
     <div className='flex flex-col gap-6'>
+
+      
 
       <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'> 
         {
@@ -47,8 +51,9 @@ export function Dashboard(){
         }
       </div>
 
-      <div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
         <SalesChart/>
+        <RecentProducts/>
       </div>
 
     </div>

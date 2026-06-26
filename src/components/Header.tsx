@@ -8,9 +8,9 @@ type HeaderProps = {
 }
 
 const NAV_ICONS = [
-  { icon: ShoppingCart, label: 'Carrinho' },
-  { icon: Heart,        label: 'Favoritos' },
-  { icon: Store,        label: 'Lojas' },
+  { icon: ShoppingCart, label: 'Carrinho', to: '' },
+  { icon: Heart,        label: 'Favoritos', to: '' },
+  { icon: Store,        label: 'Lojas', to: '/artisan/dashboard' },
 ]
 
 const CATEGORIES = [
@@ -50,14 +50,15 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
 
           {/* Col 2 mobile / Col 3 desktop — Ações */}
           <div className="flex items-center justify-end gap-4 text-primary">
-            {NAV_ICONS.map(({ icon: Icon, label }) => (
-              <button
+            {NAV_ICONS.map(({ icon: Icon, label, to }) => (
+              <Link
                 key={label}
                 aria-label={label}
+                to={to}
                 className="hover:text-primary-dark transition-colors"
               >
                 <Icon size={22} />
-              </button>
+              </Link>
             ))}
 
             <button
