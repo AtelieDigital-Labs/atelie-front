@@ -8,8 +8,8 @@ type HeaderProps = {
 }
 
 const NAV_ICONS = [
-  { icon: ShoppingCart, label: 'Carrinho', to: '' },
-  { icon: Heart,        label: 'Favoritos', to: '' },
+  { icon: ShoppingCart, label: 'Carrinho', to: '/ShoppingCart' },
+  { icon: Heart,        label: 'Favoritos', to: '/favorite' },
   { icon: Store,        label: 'Lojas', to: '/artisan/dashboard' },
 ]
 

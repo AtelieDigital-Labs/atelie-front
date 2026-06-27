@@ -2,6 +2,14 @@ import { Package, AlertTriangle, Truck, DollarSign } from 'lucide-react'
 import {MetricCard} from './components/MetricCard'
 import {SalesChart} from './components/SalesChart'
 import {RecentProducts} from './components/RecentProducts'
+import {Link, useLocation} from 'react-router-dom'
+
+const TABS = [
+  { label: 'Dashboard', to: '/artisan/dashboard' },
+  { label: 'Sua Loja',  to: '/artisan/store' },
+  { label: 'Produtos',  to: '/artisan/products' },
+  { label: 'Pedidos',   to: '/artisan/orders' },
+]
 
 const METRICS = [
   {
@@ -35,12 +43,28 @@ const METRICS = [
 ]
 
 export function Dashboard(){
+   const { pathname } = useLocation()
   return (
-
     
     <div className='flex flex-col gap-6'>
 
-      
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        {TABS.map(tab => (
+          <Link
+            key={tab.to}
+            to={tab.to}
+            className={`
+              px-5 py-2 rounded-full text-sm font-medium transition-colors border
+              ${pathname === tab.to
+                ? 'border-primary text-primary'
+                : 'border-transparent text-text/60 hover:text-primary hover:border-primary/30'
+              }
+            `}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4'> 
         {
