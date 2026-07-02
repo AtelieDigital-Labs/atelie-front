@@ -38,7 +38,7 @@ export function ProductCard({ product }: ProductCardProps) {
       : null
 
   return (
-    <div className="bg-card rounded-2xl overflow-hidden flex flex-col">
+    <div className="bg-card rounded-2xl overflow-hidden flex flex-col h-full">
     <Link to={`/product/${product.id}`} className="flex flex-col flex-1">
   
       {/* Imagem */}
