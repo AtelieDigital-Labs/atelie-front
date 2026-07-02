@@ -26,9 +26,10 @@ function formatPrice(price: number): string {
 
 type ProductCardProps = {
   product: Product
+  onRemoveFavorite?: () => void 
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
   const imageUrl = getPrimaryImage(product.variations)
   const price = getLowestPrice(product.variations)
   const badge = product.freeShipping
@@ -50,7 +51,12 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         <div className="absolute top-3 right-3">
-          <FavoriteButton />
+          <FavoriteButton 
+            initialFavorite={true}  // na lista de favoritos já está favoritado
+            onChange={(fav) => {
+              if (!fav) onRemoveFavorite?.()
+            }}
+          />
         </div>
 
         {imageUrl ? (
