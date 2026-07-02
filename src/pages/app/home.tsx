@@ -1,4 +1,5 @@
 import {ProductCard} from '../../components/ui/ProductCard'
+import {Carousel} from '../../components/ui/Carousel'
 import {type Product} from '../../schemas/product'
 import {Banner} from '../../components/ui/Banner'
 
@@ -122,6 +123,36 @@ const MOCK_PRODUCTS: Product[] = [
       },
     ],
   },
+  {
+    id: 5,
+    name: 'Cesta de Piquenique em Vime com Forro',
+    description: 'Cesta de piquenique feita à mão em vime natural, com forro de algodão removível.',
+    store_id: 5,
+    is_active: true,
+    shopName: 'Vime & Arte',
+    rating: 4.8,
+    reviewCount: 76,
+    monthlySales: 'Mais de 50 vendas no mês passado',
+    deliveryDate: 'seg., 16 de jun.',
+    fastDelivery: true,
+    variations: [
+      {
+        id: 5,
+        price: 120.00,
+        sku: 'CES-001',
+        stock: 10,
+        color: 'Natural',
+        size: 'G',
+        weight: 1.2,
+        length: 40,
+        width: 30,
+        height: 20,
+        images: [
+          { id: 4, url : 'https://placehold.co/400x400?text=Cesta', is_primary: true },
+        ],
+      },
+    ],  
+  }
 ]
 
 
@@ -141,17 +172,14 @@ export function Home(){
       />
 
     </div>
-    <section>
-      <h2 className='text-2xl mb-6'>
-      Achadinhos
-      </h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {MOCK_PRODUCTS.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-    </section>
-  
+    <section className="min-w-0">
+    <h2 className='text-2xl mb-6 font-bold'>Achadinhos</h2>
+    <Carousel>
+      {MOCK_PRODUCTS.map(product => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </Carousel>
+  </section>
+    
   </>)
 }
