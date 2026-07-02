@@ -1,6 +1,6 @@
 import { ShoppingCart, Heart, Store, User, ChevronDown, Menu } from 'lucide-react'
 import { Search } from './ui/Search'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, Link} from 'react-router-dom'
 import { useState } from 'react'
 
 type HeaderProps = {
@@ -8,9 +8,9 @@ type HeaderProps = {
 }
 
 const NAV_ICONS = [
-  { icon: ShoppingCart, label: 'Carrinho' },
-  { icon: Heart,        label: 'Favoritos' },
-  { icon: Store,        label: 'Lojas' },
+  { icon: ShoppingCart, label: 'Carrinho', to: '/ShoppingCart' },
+  { icon: Heart,        label: 'Favoritos', to: '/favorite' },
+  { icon: Store,        label: 'Lojas', to: '/artisan/dashboard' },
 ]
 
 const CATEGORIES = [
@@ -42,20 +42,23 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
         <div className="grid grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto] items-center gap-4 py-3">
 
           {/* Coluna 1  */}
+         <Link to={'/'}>
           <h1 className="font-title text-2xl font-bold text-primary whitespace-nowrap">
             Ateliê Digital
           </h1>
+         </Link>
 
           {/* Col 2 mobile / Col 3 desktop — Ações */}
           <div className="flex items-center justify-end gap-4 text-primary">
-            {NAV_ICONS.map(({ icon: Icon, label }) => (
-              <button
+            {NAV_ICONS.map(({ icon: Icon, label, to }) => (
+              <Link
                 key={label}
                 aria-label={label}
+                to={to}
                 className="hover:text-primary-dark transition-colors"
               >
                 <Icon size={22} />
-              </button>
+              </Link>
             ))}
 
             <button
