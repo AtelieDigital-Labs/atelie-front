@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import {useNavigate} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Table } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
@@ -78,12 +78,18 @@ const COLUMNS = [
     label: 'Ações',
     render: (row: ArtisanProduct) => (
       <div className="flex items-center gap-3">
-        <button aria-label="Editar" className="text-warning hover:text-warning/70 transition-colors">
-          <Pencil size={16} />
-        </button>
-        <button aria-label="Excluir" className="text-danger hover:text-danger-dark transition-colors justify-end">
-          <Trash2 size={16} />
-        </button>
+        <Link to={`/artisan/products/edit/${row.id}`}>
+          <button aria-label="Editar" className="text-warning hover:text-warning/70 transition-colors cursor-pointer">
+            <Pencil size={16} />
+          </button>
+        </Link>
+
+        
+        <Link to={`/artisan/products/delete/${row.id}`}>
+          <button aria-label="Excluir" className="text-danger hover:text-danger-dark transition-colors justify-end cursor-pointer">
+            <Trash2 size={16} />
+          </button>
+        </Link>
       </div>
     ),
   },
