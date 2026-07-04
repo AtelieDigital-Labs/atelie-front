@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import {useNavigate} from 'react-router-dom'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Table } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { Button } from '../../../components/ui/Button'
 import { DashboardTabs } from '../components/DashboardTabs'
+
 
 type ArtisanProduct = {
   id: number
@@ -91,8 +93,11 @@ const ITEMS_PER_PAGE = 4
 
 export function ArtisanProducts() {
   const [page, setPage] = useState(1)
+  const navigate = useNavigate()
   const totalPages = Math.ceil(MOCK_PRODUCTS.length / ITEMS_PER_PAGE)
   const paginated = MOCK_PRODUCTS.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,7 +110,7 @@ export function ArtisanProducts() {
       />
 
       <div className="flex items-center justify-end">
-        <Button size="md" variant="success">
+        <Button size="md" variant="success" onClick={()=> navigate('/artisan/products/new')}>
           Adicionar Produto
         </Button>
       </div>
