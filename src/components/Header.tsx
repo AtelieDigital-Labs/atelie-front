@@ -61,14 +61,18 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
               </Link>
             ))}
 
-            <button
-              aria-label="Perfil"
-              className="flex items-center gap-1.5 hover:text-primary-dark transition-colors"
-            >
-              <User size={22} />
-              <span className="hidden sm:inline text-sm">{username}</span>
-              <ChevronDown className="hidden sm:block" size={15} />
-            </button>
+            <Link to="/profile">
+              <button
+                aria-label="Perfil"
+                className="flex items-center gap-1.5 hover:text-primary-dark transition-colors
+                cursor-pointer
+                "
+              >
+                <User size={22} />
+                <span className="hidden sm:inline text-sm">{username}</span>
+                <ChevronDown className="hidden sm:block" size={15} />
+              </button>
+            </Link>
           </div>
 
           

@@ -17,6 +17,14 @@ export function formatPhone(value: string): string {
     .replace(/(-\d{4})\d+?$/, '$1')
 }
 
+// Formatação de CEP: 00000-000
+export function formatCEP(value: string): string {
+  return value
+    .replace(/\D/g, '')
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .replace(/(-\d{3})\d+?$/, '$1')
+}
+
 // Formatação de data: 00/00/0000
 export function formatDate(value: string): string {
   return value
@@ -32,5 +40,9 @@ export function unformatCPF(value: string): string {
 }
 
 export function unformatPhone(value: string): string {
+  return value.replace(/\D/g, '')
+}
+
+export function unformatCEP(value: string): string {
   return value.replace(/\D/g, '')
 }
