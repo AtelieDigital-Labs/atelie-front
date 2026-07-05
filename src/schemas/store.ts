@@ -45,7 +45,28 @@ export const storePublicSchema = z.object({
   updated_at: z.string(),
 })
 
+export const addressUpdateSchema = z.object({
+  street: z.string().max(255).optional(),
+  number: z.number().int().positive().optional(),
+  neighborhood: z.string().max(255).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().length(2).optional(),
+  zip_code: z.string().max(9).optional(),
+  complement: z.string().max(255).nullable().optional(),
+})
+
+export const storeUpdateSchema = z.object({
+  description: z.string().max(500).nullable().optional(),
+  image: z.string().max(255).nullable().optional(),
+  banner: z.string().max(255).nullable().optional(),
+  address: addressUpdateSchema.optional(),
+})
+
+
+
 export type Address = z.infer<typeof addressSchema>
 export type Category = z.infer<typeof categorySchema>
 export type StoreCreate = z.infer<typeof storeCreateSchema>
 export type StorePublic = z.infer<typeof storePublicSchema>
+export type AddressUpdate = z.infer<typeof addressUpdateSchema>
+export type StoreUpdate = z.infer<typeof storeUpdateSchema>
