@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { AppRoutes } from './app-routes'
 import {AuthRoutes} from './auth-routes'
 import {ArtisianRoutes} from './artisian-routes'
-import { ClientRoutes } from './client-routes'
+
 
 export function Router() {
   const { user, isLoading } = useAuth()
@@ -16,7 +16,7 @@ export function Router() {
       <AppRoutes />  
       <AuthRoutes/>
       <ArtisianRoutes/>
-      <ClientRoutes/> 
+   
       
     </BrowserRouter>
   )
