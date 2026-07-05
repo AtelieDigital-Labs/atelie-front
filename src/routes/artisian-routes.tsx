@@ -5,6 +5,8 @@ import {ArtisanOrders} from '../pages/artisan/orders/index'
 import {AppLayout} from '../pages/_layouts/AppLayout'
 import { NewProduct } from '../pages/artisan/products/new'
 import { EditProduct } from '../pages/artisan/products/edit'
+import {NewStore} from '../pages/artisan/store/new/index'
+import {EditStore} from '../pages/artisan/store/edit/index'
 
 export function ArtisianRoutes(){
   return(
@@ -15,6 +17,9 @@ export function ArtisianRoutes(){
           <Route path='/artisan/orders' element={<ArtisanOrders/>} />
           <Route path='/artisan/products/new' element={<NewProduct/>} />
           <Route path='/artisan/products/edit/:id' element={<EditProduct />} />
+          <Route path='/artisan/store/new' element={<NewStore />} />
+          <Route path='/artisan/store/edit' element={<EditStore />} />
+
       </Route>
     </Routes>
   )
