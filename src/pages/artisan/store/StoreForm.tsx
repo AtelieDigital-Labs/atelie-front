@@ -462,7 +462,7 @@ export function StoreForm({ mode }: StoreFormProps) {
           >
             Cancelar
           </Button>
-          <Button type="submit" variant={isCreate ? 'success' : 'primary'}>
+          <Button type="submit" variant='success'>
             {isCreate ? 'Criar Loja' : 'Salvar Alterações'}
           </Button>
         </div>
