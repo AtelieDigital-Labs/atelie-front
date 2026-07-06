@@ -5,6 +5,7 @@ import {ProductDetail} from '../pages/app/product-detail/index'
 import { SearchPage } from '../pages/app/search'
 import { Profile } from '../pages/app/Profile'
 import { Favorites } from '../pages/app/favorites'
+import { CartPage } from '../pages/app/cart'
 
 
 export function AppRoutes(){
@@ -16,6 +17,7 @@ export function AppRoutes(){
         <Route path="/favorite" element={<Favorites />} /> 
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/cart" element={<CartPage />} />
 
       </Route>
     </Routes>
