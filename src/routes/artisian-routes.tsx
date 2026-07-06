@@ -7,6 +7,7 @@ import { NewProduct } from '../pages/artisan/products/new'
 import { EditProduct } from '../pages/artisan/products/edit'
 import {NewStore} from '../pages/artisan/store/new/index'
 import {EditStore} from '../pages/artisan/store/edit/index'
+import {StoreProfile} from '../pages/artisan/store/profile/index'
 
 export function ArtisianRoutes(){
   return(
@@ -19,6 +20,7 @@ export function ArtisianRoutes(){
           <Route path='/artisan/products/edit/:id' element={<EditProduct />} />
           <Route path='/artisan/store/new' element={<NewStore />} />
           <Route path='/artisan/store/edit' element={<EditStore />} />
+          <Route path='/artisan/store/profile/:id' element={<StoreProfile />} />
 
       </Route>
     </Routes>
