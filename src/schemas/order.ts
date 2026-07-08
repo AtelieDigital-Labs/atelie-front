@@ -26,7 +26,7 @@ export const paymentInfoSchema = z.object({
   id: z.string(),
   qr_code_base64: z.string(),
   qr_code: z.string(),
-  expires_at: z.iso.datetime().nullable().optional(),
+  expires_at: z.coerce.date().nullable().optional(),
 })
 
 export type PaymentInfo = z.infer<typeof paymentInfoSchema>
