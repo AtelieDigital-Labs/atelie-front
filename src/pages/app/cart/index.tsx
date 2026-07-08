@@ -4,6 +4,7 @@ import { ShoppingCart } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { CartProductCard } from './components/CartProductCard'
 import type { CartItemDisplay } from '../../../schemas/cart'
+import {OrderSummary} from './components/OrderSummary'
 
 // mock — simulando GET /api/v1/carts/ + GET /api/v1/catalog/products/
 const MOCK_CART: CartItemDisplay[] = [
@@ -82,45 +83,12 @@ export function CartPage() {
       </div>
 
       
-      <div className="bg-card rounded-2xl p-6 flex flex-col gap-4 w-full lg:w-80 lg:sticky lg:top-4">
-        <h3 className="font-title text-lg text-primary font-bold">Resumo do Pedido</h3>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text/60">Subtotal</span>
-            <span className="font-medium">
-              R$ {subtotal.toFixed(2).replace('.', ',')}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text/60">Frete</span>
-            <span className={hasFreeShipping ? 'text-success font-medium' : 'font-medium'}>
-              {hasFreeShipping ? 'Grátis' : 'A calcular'}
-            </span>
-          </div>
-        </div>
-
-        <div className="border-t border-primary/10 pt-3 flex items-center justify-between">
-          <span className="font-semibold text-text">Total</span>
-          <span className="text-xl text-primary font-bold">
-            R$ {subtotal.toFixed(2).replace('.', ',')}
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Button fullWidth size="md" variant="success">
-            Continuar
-          </Button>
-          <Button
-            fullWidth
-            size="md"
-            variant="warning"
-            onClick={() => navigate('/')}
-          >
-            Adicionar produtos
-          </Button>
-        </div>
-      </div>
+      <OrderSummary
+        subtotal={subtotal}
+        shipping={hasFreeShipping ? 0 : null}
+        onContinue={() => navigate('/checkout/shipping')}
+        onAddProducts={() => navigate('/')}
+      />
 
     </div>
   )
