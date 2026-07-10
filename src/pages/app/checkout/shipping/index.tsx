@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Home } from 'lucide-react'
 import { Button } from '../../../../components/ui/Button'
 import { OrderSummary } from '../../../app/cart/components/OrderSummary'
+import { orderCreatedSchema } from '../../../../schemas/order'
 import type { ShippingOption } from '../../../../schemas/shipping'
 import type { Address } from '../../../../schemas/user'
 
@@ -39,6 +40,35 @@ const MOCK_SHIPPING: { cheapest: ShippingOption; fastest: ShippingOption } = {
 
 const SUBTOTAL = 86.64
 
+
+
+// simula a resposta do POST /orders quando o MP consegue gerar o QR Code - irei remover quando integrar
+async function mockCreateOrder() {
+  // Simular falha do Mercado Pago, comente o "return" abaixo e descomente isto:
+  // throw {
+  //   response: {
+  //     data: {
+  //       detail: 'Pedido criado! Porém, ocorreu um erro ao gerar o pagamento. Acesse Meus Pedidos para tentar pagar novamente.'
+  //     }
+  //   }
+  // }
+
+  return {
+    data: {
+      message: 'Pedido gerado',
+      checkout_group_id: 'mock-group-id',
+      order_ids: [999],
+      payment_info: {
+        id: 'mp-payment-123',
+        qr_code_base64: '', // não é usado aqui — o PaymentPage gera o próprio mock de QR
+        qr_code: '00020126580014br.gov.bcb.pix0136a1b2c3-teste-fake6304ABCD',
+      },
+    },
+  }
+}
+
+
+
 export function ShippingPage() {
   const navigate = useNavigate()
   const [selectedAddress, setSelectedAddress] = useState<number>(MOCK_ADDRESSES[0]?.id)
@@ -52,14 +82,43 @@ export function ShippingPage() {
   const currentShipping = MOCK_SHIPPING[selectedShipping]
   const shippingPrice = currentShipping.total_price
 
+  
+  async function handleFinalizarCompra() {
+    try {
+      // irei trocar pela chamada real e remover mockCreateOrder:
+      // const response = await api.post('/orders', {
+      //   address_id: String(selectedAddress),
+      //   payment_method: 'pix',
+      //   shipping_method: currentShipping.name,
+      // })
+      const response = await mockCreateOrder() // MOCK
+
+      // se chegou aqui, o status foi 2xx → o MP gerou o QR Code com sucesso
+      const data = orderCreatedSchema.parse(response.data)
+
+      navigate('/checkout/payment', {
+        state: {
+          payment_info: data.payment_info,
+          order_id: data.order_ids[0],
+          checkout_group_id: data.checkout_group_id,
+        },
+      })
+    } catch (error: any) {
+      // se caiu aqui, o status foi 4xx/5xx → o MP falhou em gerar o QR Code
+      navigate('/checkout/payment-error', {
+        state: {
+          message: error?.response?.data?.detail ?? 'Erro ao processar pagamento.',
+        },
+      })
+    }
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-     
       <div className="flex-1 flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Opções de Entrega</h2>
 
-        
         <div className="bg-card rounded-2xl p-6 flex flex-col gap-4">
           <h3 className="text-center font-semibold text-text/90 text-xl">
             Selecione o Endereço
@@ -117,7 +176,6 @@ export function ShippingPage() {
           </div>
         </div>
 
-      
         <div className="bg-card rounded-2xl p-6 flex flex-col gap-4">
           <h3 className="text-center font-semibold text-text/90 text-xl">
             Selecione o Frete
@@ -163,11 +221,10 @@ export function ShippingPage() {
         </div>
       </div>
 
-      
       <OrderSummary
         subtotal={SUBTOTAL}
         shipping={shippingPrice}
-        onContinue={() => navigate('/checkout/payment')}
+        onContinue={handleFinalizarCompra}
         onAddProducts={() => navigate('/')}
       />
 

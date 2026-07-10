@@ -8,6 +8,7 @@ import { Favorites } from '../pages/app/favorites'
 import { CartPage } from '../pages/app/cart'
 import { ShippingPage } from '../pages/app/checkout/shipping'
 import { PaymentPage } from '../pages/app/checkout/payment'
+import { PaymentErrorPage } from '../pages/app/checkout/payment-erro'
 
 
 export function AppRoutes(){
@@ -22,6 +23,7 @@ export function AppRoutes(){
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout/shipping" element={<ShippingPage />} />
         <Route path="/checkout/payment" element={<PaymentPage />} />
+        <Route path="/checkout/payment-error" element={<PaymentErrorPage />} />
         
 
       </Route>
