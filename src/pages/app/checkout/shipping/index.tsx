@@ -7,6 +7,7 @@ import { orderCreatedSchema } from '../../../../schemas/order'
 import type { ShippingOption } from '../../../../schemas/shipping'
 import type { Address } from '../../../../schemas/user'
 
+
 // mock — GET /api/v1/accounts/addresses/
 const MOCK_ADDRESSES: Address[] = [
   {
@@ -22,7 +23,7 @@ const MOCK_ADDRESSES: Address[] = [
   },
 ]
 
-// mock — POST /api/v1/shipping/calculate
+// mock — GET /api/v1/checkout/shipping/{address_id}
 const MOCK_SHIPPING: { cheapest: ShippingOption; fastest: ShippingOption } = {
   cheapest: {
     name: 'Econômico',
@@ -41,32 +42,34 @@ const MOCK_SHIPPING: { cheapest: ShippingOption; fastest: ShippingOption } = {
 const SUBTOTAL = 86.64
 
 
+// true  = Mercado Pago gerou o QR Code com sucesso → vai pra tela de pagamento
+// false = Mercado Pago falhou → vai pra tela de erro
+const MOCK_PAYMENT_SUCCESS = true
 
-// simula a resposta do POST /orders quando o MP consegue gerar o QR Code - irei remover quando integrar
 async function mockCreateOrder() {
-  // Simular falha do Mercado Pago, comente o "return" abaixo e descomente isto:
-  // throw {
-  //   response: {
-  //     data: {
-  //       detail: 'Pedido criado! Porém, ocorreu um erro ao gerar o pagamento. Acesse Meus Pedidos para tentar pagar novamente.'
-  //     }
-  //   }
-  // }
+  if (!MOCK_PAYMENT_SUCCESS) {
+    throw {
+      response: {
+        data: {
+          detail: 'Pedido criado! Porém, ocorreu um erro ao gerar o pagamento. Acesse Meus Pedidos para tentar pagar novamente.',
+        },
+      },
+    }
+  }
 
   return {
     data: {
       message: 'Pedido gerado',
       checkout_group_id: 'mock-group-id',
-      order_ids: [999],
+      order_ids: [1, 2], // simula um carrinho com pedidos de 2 lojas diferentes
       payment_info: {
         id: 'mp-payment-123',
-        qr_code_base64: '', // não é usado aqui — o PaymentPage gera o próprio mock de QR
+        qr_code_base64: '', // não é usado — o PaymentPage gera o próprio mock de QR
         qr_code: '00020126580014br.gov.bcb.pix0136a1b2c3-teste-fake6304ABCD',
       },
     },
   }
 }
-
 
 
 export function ShippingPage() {
@@ -82,10 +85,9 @@ export function ShippingPage() {
   const currentShipping = MOCK_SHIPPING[selectedShipping]
   const shippingPrice = currentShipping.total_price
 
-  
   async function handleFinalizarCompra() {
     try {
-      // irei trocar pela chamada real e remover mockCreateOrder:
+      // trocar pela chamada real e remover mockCreateOrder:
       // const response = await api.post('/orders', {
       //   address_id: String(selectedAddress),
       //   payment_method: 'pix',
@@ -93,18 +95,16 @@ export function ShippingPage() {
       // })
       const response = await mockCreateOrder() // MOCK
 
-      // se chegou aqui, o status foi 2xx → o MP gerou o QR Code com sucesso
       const data = orderCreatedSchema.parse(response.data)
 
       navigate('/checkout/payment', {
         state: {
           payment_info: data.payment_info,
-          order_id: data.order_ids[0],
+          order_ids: data.order_ids, // ← manda TODOS os ids do grupo, não só o primeiro
           checkout_group_id: data.checkout_group_id,
         },
       })
     } catch (error: any) {
-      // se caiu aqui, o status foi 4xx/5xx → o MP falhou em gerar o QR Code
       navigate('/checkout/payment-error', {
         state: {
           message: error?.response?.data?.detail ?? 'Erro ao processar pagamento.',
