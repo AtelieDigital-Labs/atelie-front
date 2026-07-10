@@ -30,7 +30,6 @@ export const paymentInfoSchema = z.object({
 
 export type PaymentInfo = z.infer<typeof paymentInfoSchema>
 
-
 export const orderStatusSchema = z.enum([
   'PENDING',
   'PAID',
@@ -52,7 +51,7 @@ export const orderCheckoutRequestSchema = z.object({
 
 export type OrderCheckoutRequest = z.infer<typeof orderCheckoutRequestSchema>
 
-// resposta do POST /orders — order_ids depende do ajusteno backend
+// resposta do POST /orders — order_ids depende do ajuste no backend
 export const orderCreatedSchema = z.object({
   message: z.string(),
   checkout_group_id: z.string(),
@@ -77,6 +76,11 @@ export const orderReadSchema = z.object({
 })
 
 export type OrderRead = z.infer<typeof orderReadSchema>
+
+// grupo de pedidos = simplesmente um array de OrderRead,
+// buscado individualmente via GET /orders/{order_id} para cada order_id do grupo.
+// Não precisa de schema novo nem de rota de agrupamento no backend.
+export type OrderGroup = OrderRead[]
 
 export const orderResponseSchema = z.object({
   order_id: z.number(),
