@@ -53,7 +53,7 @@ export function OrderSummary({
           {continueLabel}
         </Button>
         {onAddProducts && (
-          <Button fullWidth size="md" variant="warning" onClick={onAddProducts}>
+          <Button fullWidth size="md" variant="primary" onClick={onAddProducts}>
             Adicionar produtos
           </Button>
         )}
