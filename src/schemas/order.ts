@@ -110,3 +110,38 @@ export const pageSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
 
 export const ordersPageSchema = pageSchema(orderResponseSchema)
 export type OrdersPage = z.infer<typeof ordersPageSchema>
+
+// PARA PEDIDOS DO ARTESÃO 
+
+
+export const orderArtisanReadSchema = z.object({
+  order_id: z.number(),
+  status: orderStatusSchema,
+  price: z.coerce.number(),
+  created_at: z.coerce.date(),
+  shipping_cost: z.coerce.number(),
+  shipping_method: z.string(),
+  shipping_address: shippingAddressSchema,
+  items: z.array(orderItemSchema),
+})
+
+export type OrderArtisanRead = z.infer<typeof orderArtisanReadSchema>
+
+// PATCH /stores/orders/{order_id}/status — corpo da requisição
+export const orderArtisanStatusUpdateSchema = z.object({
+  status: orderStatusSchema,
+  tracking_code: z.string().nullable().optional(),
+})
+
+export type OrderArtisanStatusUpdate = z.infer<typeof orderArtisanStatusUpdateSchema>
+
+export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  PENDING: [],
+  PAID: ['PROCESSING', 'SHIPPED', 'CANCELLED'],
+  PROCESSING: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'CANCELLED'],
+  REFUSED: [],
+  EXPIRED: [],
+  DELIVERED: [],
+  CANCELLED: [],
+}
