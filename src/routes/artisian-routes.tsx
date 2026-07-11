@@ -8,6 +8,7 @@ import { EditProduct } from '../pages/artisan/products/edit'
 import {NewStore} from '../pages/artisan/store/new/index'
 import {EditStore} from '../pages/artisan/store/edit/index'
 import {StoreProfile} from '../pages/artisan/store/profile/index'
+import {ArtisanOrderDetailPage} from '../pages/artisan/orders/detail'
 
 export function ArtisianRoutes(){
   return(
@@ -16,6 +17,7 @@ export function ArtisianRoutes(){
           <Route path='/artisan/dashboard' element={<Dashboard/>} />
           <Route path='/artisan/products' element={<ArtisanProducts/>} />
           <Route path='/artisan/orders' element={<ArtisanOrders/>} />
+          <Route path='/artisan/orders/:orderId' element={<ArtisanOrderDetailPage/>} />
           <Route path='/artisan/products/new' element={<NewProduct/>} />
           <Route path='/artisan/products/edit/:id' element={<EditProduct />} />
           <Route path='/artisan/store/new' element={<NewStore />} />

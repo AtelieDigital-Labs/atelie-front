@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Table } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
@@ -38,7 +39,7 @@ const SHIPPING_STYLES = {
   ENTREGUE:   'bg-success/10 text-success',
 }
 
-const COLUMNS = [
+const COLUMNS = (navigate: ReturnType<typeof useNavigate>) => [
   {
     key: 'order',
     label: 'Pedido',
@@ -89,8 +90,12 @@ const COLUMNS = [
   {
     key: 'actions',
     label: 'Ações',
-    render: (_row: Order) => (
-      <button aria-label="Ver detalhes" className="text-text/40 hover:text-primary transition-colors">
+    render: (row: Order) => (
+      <button
+        onClick={() => navigate(`/artisan/orders/${row.id.replace('#', '')}`)}
+        aria-label="Ver detalhes"
+        className="text-text/40 hover:text-primary transition-colors cursor-pointer"
+      >
         <Search size={16} />
       </button>
     ),
@@ -100,6 +105,7 @@ const COLUMNS = [
 const ITEMS_PER_PAGE = 10
 
 export function ArtisanOrders() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const totalPages = Math.ceil(MOCK_ORDERS.length / ITEMS_PER_PAGE)
   const paginated = MOCK_ORDERS.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
@@ -109,7 +115,7 @@ export function ArtisanOrders() {
       <DashboardTabs />
 
       <Table
-        columns={COLUMNS}
+        columns={COLUMNS(navigate)}
         data={paginated}
         emptyMessage="Nenhum pedido encontrado"
       />
