@@ -104,7 +104,7 @@ export function Header() {
                 {isAuthenticated && user ? (
                   <span className="hidden sm:inline text-sm">{user.username}</span>
                 ) : (
-                  <Link to='sign-in' className="hidden sm:inline text-sm">Sign-in</Link>
+                  <Link to='auth/sign-in' className="hidden sm:inline text-sm">Sign-in</Link>
                 )}
                 <ChevronDown className="hidden sm:block" size={15} />
               </button>

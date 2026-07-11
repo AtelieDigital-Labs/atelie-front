@@ -52,6 +52,7 @@ export const productSchema = z.object({
   description: z.string(),
   store_id: z.number(),
   is_active: z.boolean(),
+  is_favorite: z.boolean(),
   variations: z.array(productVariationSchema),
 
   // virão de outros endpoints

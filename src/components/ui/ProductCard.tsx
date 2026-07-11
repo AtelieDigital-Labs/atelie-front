@@ -3,10 +3,12 @@ import { FavoriteButton } from './FavoriteButton'
 import { type Product, type ProductVariation } from '../../schemas/product'
 import {Button} from './Button'
 import { Link } from 'react-router-dom'
+import { useCreateIsFavorite } from '../../hooks/catalogs/useFavorites'
+import { useAuth } from '../../hooks/useAuth'
 
 function getPrimaryImage(variations: ProductVariation[]): string | null {
   for (const variation of variations) {
-    const primary = variation.images.find(img => img.is_primary)
+    const primary = variation.images.find(img => img)
     if (primary) return primary.url
   }
   return null
@@ -30,6 +32,7 @@ type ProductCardProps = {
 }
 
 export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
+  const favoriteMutation = useCreateIsFavorite()
   const imageUrl = getPrimaryImage(product.variations)
   const price = getLowestPrice(product.variations)
   const badge = product.freeShipping
@@ -52,9 +55,14 @@ export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
 
         <div className="absolute top-3 right-3">
           <FavoriteButton 
-            initialFavorite={true}  // na lista de favoritos já está favoritado
+            initialFavorite={product.is_favorite}  // na lista de favoritos já está favoritado
             onChange={(fav) => {
-              if (!fav) onRemoveFavorite?.()
+              if (!fav) {
+                onRemoveFavorite?.()
+              } else {
+                
+                favoriteMutation.mutate(product.id)
+              }
             }}
           />
         </div>

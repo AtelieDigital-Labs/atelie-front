@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { listProducts, getProduct } from "../../api/catalogs/products";
 
+
 export function useProducts() {
   return useQuery({
     queryKey: ["products"],
@@ -16,3 +17,11 @@ export function useProduct(productId: number) {
     enabled: !!productId,
   });
 }
+
+// export function useProductsFavorites(data: number[]) {
+//   return useQuery({
+//     queryKey: ["product-favorites"],
+//     queryFn: () => listProductsFavorites(data),
+//     enabled: !!data,
+//   });
+// }
