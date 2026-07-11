@@ -114,10 +114,10 @@ export function PaymentApprovedPage() {
 
       
       <div className="flex flex-col items-center gap-2 text-center">
-        <div className="w-28 h-28 rounded-full bg-success flex items-center justify-center">
+        <div className="w-28 h-28 rounded-full bg-success flex items-center justify-center shadow-lg shadow-success/50">
           <Check className="text-white" size={56} />
         </div>
-        <h2 className="text-lg font-bold text-text">Pagamento Aprovado!</h2>
+        <h2 className="text-xl font-bold text-text">Pagamento Aprovado!</h2>
         <p className="text-xs text-text/50">
           Seu pedido foi confirmado e já está sendo processado
         </p>
