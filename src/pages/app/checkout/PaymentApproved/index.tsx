@@ -16,6 +16,7 @@ const MOCK_ORDERS: OrderGroup = [
     tracking_code: null,
     payment_method: 'pix',
     store_id: 'store-1',
+    checkout_group_id: 'mock-group-id',
     created_at: new Date(),
     shipping_address: {
       street: 'Rua Exemplo',
@@ -39,6 +40,7 @@ const MOCK_ORDERS: OrderGroup = [
     tracking_code: null,
     payment_method: 'pix',
     store_id: 'store-2',
+    checkout_group_id: 'mock-group-id',
     created_at: new Date(),
     shipping_address: {
       street: 'Rua Exemplo',
@@ -174,7 +176,7 @@ export function PaymentApprovedPage() {
           <span className="text-lg font-bold text-primary">R$ {total.toFixed(2)}</span>
         </div>
 
-        <Button fullWidth onClick={() => navigate('/client/orders')} className="cursor-pointer">
+        <Button fullWidth onClick={() => navigate(`/orders/${orders[0].order_id}`)} className="cursor-pointer">
           Ver Detalhes do Pedido
         </Button>
       </div>
