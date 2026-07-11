@@ -114,13 +114,13 @@ export function ShippingPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start w-full px-4 lg:px-0">
 
-      <div className="flex-1 flex flex-col gap-4">
-        <h2 className="text-2xl font-bold">Opções de Entrega</h2>
+      <div className="flex-1 flex flex-col gap-4 w-full">
+        <h2 className="text-xl lg:text-2xl font-bold">Opções de Entrega</h2>
 
-        <div className="bg-card rounded-2xl p-6 flex flex-col gap-4">
-          <h3 className="text-center font-semibold text-text/90 text-xl">
+        <div className="bg-card rounded-2xl p-4 lg:p-6 flex flex-col gap-4">
+          <h3 className="text-center font-semibold text-text/90 text-lg lg:text-xl">
             Selecione o Endereço
           </h3>
 
@@ -129,7 +129,7 @@ export function ShippingPage() {
               <label
                 key={address.id}
                 className={`
-                  flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors
+                  flex items-start gap-3 p-3 lg:p-4 rounded-xl border-2 cursor-pointer transition-colors
                   ${selectedAddress === address.id
                     ? 'border-primary bg-primary/5'
                     : 'border-primary/10 hover:border-primary/30'
@@ -144,7 +144,7 @@ export function ShippingPage() {
                   onChange={() => setSelectedAddress(address.id)}
                   className="accent-primary mt-0.5"
                 />
-                <div className="flex flex-col gap-0.5 flex-1">
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                   {address.is_main && (
                     <span className="text-xs bg-warning/20 text-warning font-semibold px-2 py-0.5 rounded-full w-fit">
                       Casa
@@ -152,7 +152,7 @@ export function ShippingPage() {
                   )}
                   <div className="flex items-center gap-1.5 text-sm text-text mt-1">
                     <Home size={14} className="text-primary shrink-0" />
-                    <span>{address.street}, {address.number}</span>
+                    <span className="break-words">{address.street}, {address.number}</span>
                   </div>
                   <p className="text-xs text-text/60 ml-5">
                     {address.neighborhood}
@@ -164,11 +164,12 @@ export function ShippingPage() {
               </label>
             ))}
           </div>
-          <div className='flex flex-start'>
+          <div className='flex justify-start'>
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={() => navigate('/profile')}
+                className="w-full sm:w-auto"
               >
                 Adicionar Novo Endereço
               </Button>
@@ -176,8 +177,8 @@ export function ShippingPage() {
           </div>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 flex flex-col gap-4">
-          <h3 className="text-center font-semibold text-text/90 text-xl">
+        <div className="bg-card rounded-2xl p-4 lg:p-6 flex flex-col gap-4">
+          <h3 className="text-center font-semibold text-text/90 text-lg lg:text-xl">
             Selecione o Frete
           </h3>
 
@@ -186,7 +187,7 @@ export function ShippingPage() {
               <label
                 key={key}
                 className={`
-                  flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors
+                  flex items-start gap-3 p-3 lg:p-4 rounded-xl border-2 cursor-pointer transition-colors
                   ${selectedShipping === key
                     ? 'border-primary bg-primary/5'
                     : 'border-primary/10 hover:border-primary/30'
@@ -201,10 +202,10 @@ export function ShippingPage() {
                   onChange={() => setSelectedShipping(key)}
                   className="accent-primary mt-0.5"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-text">{option.name}</p>
-                    <span className={option.total_price === 0 ? 'text-success text-sm font-semibold' : 'text-sm font-semibold text-text'}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-text truncate">{option.name}</p>
+                    <span className={`${option.total_price === 0 ? 'text-success' : 'text-text'} text-sm font-semibold whitespace-nowrap`}>
                       {option.total_price === 0
                         ? 'Grátis'
                         : `R$ ${option.total_price.toFixed(2).replace('.', ',')}`
@@ -221,12 +222,14 @@ export function ShippingPage() {
         </div>
       </div>
 
-      <OrderSummary
-        subtotal={SUBTOTAL}
-        shipping={shippingPrice}
-        onContinue={handleFinalizarCompra}
-        onAddProducts={() => navigate('/')}
-      />
+      <div className="w-full lg:w-auto lg:min-w-[350px]">
+        <OrderSummary
+          subtotal={SUBTOTAL}
+          shipping={shippingPrice}
+          onContinue={handleFinalizarCompra}
+          onAddProducts={() => navigate('/')}
+        />
+      </div>
 
     </div>
   )
