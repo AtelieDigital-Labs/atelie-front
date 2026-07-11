@@ -53,7 +53,7 @@ export function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center px-4">
         <ShoppingCart size={48} className="text-primary/20" />
         <p className="text-lg font-semibold text-text">Seu carrinho está vazio</p>
         <p className="text-sm text-text/50">Explore os produtos e adicione ao carrinho</p>
@@ -63,13 +63,13 @@ export function CartPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start w-full">
 
       {/* Lista */}
-      <div className="flex-1 bg-card rounded-2xl p-6">
+      <div className="flex-1 bg-card rounded-2xl p-4 lg:p-6 w-full">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold">Meu Carrinho</h2>
-          <span className="text-sm text-text/50">{items.length} itens</span>
+          <h2 className="text-xl lg:text-2xl font-bold">Meu Carrinho</h2>
+          <span className="text-sm text-text/50">{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
         </div>
 
         {items.map(item => (
@@ -83,12 +83,14 @@ export function CartPage() {
       </div>
 
       
-      <OrderSummary
-        subtotal={subtotal}
-        shipping={hasFreeShipping ? 0 : null}
-        onContinue={() => navigate('/checkout/shipping')}
-        onAddProducts={() => navigate('/')}
-      />
+      <div className="w-full lg:w-auto lg:min-w-[350px]">
+        <OrderSummary
+          subtotal={subtotal}
+          shipping={hasFreeShipping ? 0 : null}
+          onContinue={() => navigate('/checkout/shipping')}
+          onAddProducts={() => navigate('/')}
+        />
+      </div>
 
     </div>
   )
