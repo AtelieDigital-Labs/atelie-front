@@ -70,6 +70,7 @@ export const orderReadSchema = z.object({
   tracking_code: z.string().nullable().optional(),
   payment_method: z.string(),
   store_id: z.string(),
+  checkout_group_id: z.string(),
   created_at: z.coerce.date(),
   shipping_address: shippingAddressSchema,
   items: z.array(orderItemSchema),
