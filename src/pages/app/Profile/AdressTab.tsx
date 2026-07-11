@@ -4,7 +4,9 @@ import { Table } from '../../../components/ui/Table'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import type { Address, AddressCreate } from '../../../schemas/user'
-import {formatCEP, unformatCEP} from '../../../utils/formatters'
+import { formatCEP, unformatCEP } from '../../../utils/formatters'
+import { useCreateAddress, useDeleteAddresses, useGetAddresses, useUpdateAddress } from '../../../hooks/accounts/useAddresses'
+import axios from 'axios'
 
 const EMPTY_ADDRESS: AddressCreate = {
   street: '',
@@ -17,56 +19,7 @@ const EMPTY_ADDRESS: AddressCreate = {
   is_main: false,
 }
 
-const COLUMNS = [
-  {
-    key: 'address',
-    label: 'Endereço',
-    render: (row: Address) => (
-      <div className="flex items-center gap-2">
-        <span className="font-medium">{row.street}, {row.number}</span>
-        {row.is_main && (
-          <span className="text-xs text-success border border-success/30 rounded-full px-2 py-0.5">
-            Padrão
-          </span>
-        )}
-      </div>
-    ),
-  },
-  {
-    key: 'neighborhood',
-    label: 'Comp. / Bairro',
-    render: (row: Address) => (
-      <div>
-        <p className="text-xs text-text/50">{row.complement ?? '-'}</p>
-        <p>{row.neighborhood}</p>
-      </div>
-    ),
-  },
-  {
-    key: 'city',
-    label: 'Cidade/UF',
-    render: (row: Address) => <span>{row.city} / {row.state}</span>,
-  },
-  {
-    key: 'zip_code',
-    label: 'CEP',
-    render: (row: Address) => <span>{formatCEP(row.zip_code)}</span>,
-  },
-  {
-    key: 'actions',
-    label: 'Ações',
-    render: (_row: Address) => (
-      <div className="flex items-center gap-3">
-        <button aria-label="Editar" className="text-warning hover:text-warning/70 transition-colors">
-          <Pencil size={16} />
-        </button>
-        <button aria-label="Excluir" className="text-danger hover:text-danger-dark transition-colors">
-          <Trash2 size={16} />
-        </button>
-      </div>
-    ),
-  },
-]
+
 
 type AddressTabProps = {
   initialAddresses: Address[]
@@ -74,18 +27,24 @@ type AddressTabProps = {
 
 export function AddressTab({ initialAddresses }: AddressTabProps) {
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses)
-  const [showForm, setShowForm]   = useState(false)
-  const [form, setForm]           = useState<AddressCreate>(EMPTY_ADDRESS)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [form, setForm] = useState<AddressCreate>(EMPTY_ADDRESS)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const createAddressMutation = useCreateAddress()
+  const updateAddressMutation = useUpdateAddress()
+  const deleteAddressMutation = useDeleteAddresses()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    
-    const {name, value} = e.target
+
+    const { name, value } = e.target
 
     let formattedValue = value
     if (name === 'zip_code') {
       formattedValue = formatCEP(value)
     }
-    
+
     setForm(prev => ({
       ...prev,
       [e.target.name]: e.target.name === 'number'
@@ -94,21 +53,149 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
     }))
   }
 
-
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    // mock — POST /api/v1/accounts/addresses/
-    const payload = {
+
+    const payload: AddressCreate = {
       ...form,
       zip_code: unformatCEP(form.zip_code),
     }
+    if (editingId) {
+      updateAddressMutation.mutate(
+        {
+          id: editingId,
+          data: payload,
+        },
+        {
+          onSuccess: (updated) => {
+            setAddresses(prev =>
+              prev.map(address =>
+                address.id === updated.id ? updated : address
+              )
+            )
 
+            setShowForm(false)
+            setEditingId(null)
+            setForm(EMPTY_ADDRESS)
+            setErrors({})
+          },
+          onError: (error) => {
+            if (axios.isAxiosError(error) && error.response?.data) {
+              const apiErrors = error.response.data
 
-    const newAddress: Address = { ...payload, id: Date.now() }
-    setAddresses(prev => [...prev, newAddress])
-    setShowForm(false)
-    setForm(EMPTY_ADDRESS)
+              const formatted: Record<string, string> = {}
+
+              Object.entries(apiErrors).forEach(([field, messages]) => {
+                formatted[field] = Array.isArray(messages)
+                  ? messages[0]
+                  : String(messages)
+              })
+
+              setErrors(formatted)
+            }
+          },
+        }
+      )
+    } else {
+      createAddressMutation.mutate(payload, {
+        onSuccess: (created) => {
+          setAddresses(prev => [...prev, created])
+          setShowForm(false)
+          setForm(EMPTY_ADDRESS)
+          setErrors({})
+        },
+        onError: (error) => {
+          if (axios.isAxiosError(error) && error.response?.data) {
+            const apiErrors = error.response.data
+
+            const formatted: Record<string, string> = {}
+
+            Object.entries(apiErrors).forEach(([field, messages]) => {
+              formatted[field] = Array.isArray(messages)
+                ? messages[0]
+                : String(messages)
+            })
+
+            setErrors(formatted)
+          }
+        },
+      })
+    }
   }
+
+  function handleDelete(id: number) {
+    try {
+      deleteAddressMutation.mutate(id)
+      setAddresses(prev => prev.filter(a => a.id !== id))
+    } catch {
+
+    }
+  }
+
+  const COLUMNS = [
+    {
+      key: 'address',
+      label: 'Endereço',
+      render: (row: Address) => (
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{row.street}, {row.number}</span>
+          {row.is_main && (
+            <span className="text-xs text-success border border-success/30 rounded-full px-2 py-0.5">
+              Padrão
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'neighborhood',
+      label: 'Comp. / Bairro',
+      render: (row: Address) => (
+        <div>
+          <p className="text-xs text-text/50">{row.complement ?? '-'}</p>
+          <p>{row.neighborhood}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'city',
+      label: 'Cidade/UF',
+      render: (row: Address) => <span>{row.city} / {row.state}</span>,
+    },
+    {
+      key: 'zip_code',
+      label: 'CEP',
+      render: (row: Address) => <span>{formatCEP(row.zip_code)}</span>,
+    },
+    {
+      key: 'actions',
+      label: 'Ações',
+      render: (_row: Address) => (
+        <div className="flex items-center gap-3">
+          <button onClick={() => {
+            setEditingId(_row.id)
+            setShowForm(true)
+
+            setForm({
+              street: _row.street,
+              number: _row.number,
+              complement: _row.complement ?? "",
+              neighborhood: _row.neighborhood,
+              city: _row.city,
+              state: _row.state,
+              zip_code: formatCEP(_row.zip_code),
+              is_main: _row.is_main,
+            })
+          }} aria-label="Editar" className="text-warning hover:text-warning/70 transition-colors">
+            <Pencil size={16} />
+          </button>
+          <button onClick={() => handleDelete(_row.id)} aria-label="Excluir" className="text-danger hover:text-danger-dark transition-colors">
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ),
+    },
+  ]
 
   return (
     <div className="flex flex-col gap-4">
@@ -131,6 +218,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
                 onChange={handleChange}
                 placeholder="59965-000"
                 maxLength={9}
+                error={errors.zip_code}
                 required
               />
               <Input
@@ -140,6 +228,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
                 value={form.number || ''}
                 onChange={handleChange}
                 placeholder="442"
+                error={errors.number}
                 required
               />
             </div>
@@ -150,6 +239,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
               value={form.street}
               onChange={handleChange}
               placeholder="Rua das Araucarias"
+              error={errors.street}
               required
             />
 
@@ -158,6 +248,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
               name="complement"
               value={form.complement ?? ''}
               onChange={handleChange}
+              error={errors.complement}
               placeholder="Apto 101"
             />
 
@@ -167,6 +258,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
               value={form.neighborhood}
               onChange={handleChange}
               placeholder="Centro"
+              error={errors.neighborhood}
               required
             />
 
@@ -177,6 +269,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
                 value={form.city}
                 onChange={handleChange}
                 placeholder="Alexandria"
+                error={errors.city}
                 required
               />
               <Input
@@ -184,6 +277,7 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
                 name="state"
                 value={form.state}
                 onChange={handleChange}
+                error={errors.state}
                 placeholder="RN"
                 maxLength={2}
                 required
@@ -220,9 +314,9 @@ export function AddressTab({ initialAddresses }: AddressTabProps) {
         </div>
       ) : (
         <div className='flex justify-end'>
-        <Button variant="success" size="sm" onClick={() => setShowForm(true)}>
-          Adicionar novo endereço
-        </Button>
+          <Button variant="success" size="sm" onClick={() => setShowForm(true)}>
+            Adicionar novo endereço
+          </Button>
         </div>
       )}
     </div>

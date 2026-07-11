@@ -6,6 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
 import { formatCPF, formatPhone, unformatCPF, unformatPhone } from '../../utils/formatters'
 import logo from '../../assets/logo-creme.svg'
+import { useRegister } from '../../hooks/accounts/useAuth'
 
 export function SignUp() {
   const navigate = useNavigate()
@@ -21,33 +22,32 @@ export function SignUp() {
     resolver: zodResolver(signUpSchema),
     mode: 'onBlur',
   })
+  const registerMutation = useRegister();
 
   async function onSubmit(data: SignUpPayload) {
-  clearErrors()
-  
-  // Remove formatação antes de enviar para API
-  const payload = {
-    ...data,
-    cpf: data.cpf ? unformatCPF(data.cpf) : '',
-    phone_number: data.phone_number ? unformatPhone(data.phone_number) : '',
-  }
-  
-  // Simula delay da API
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  
-  // Simula sucesso (
-  localStorage.setItem('user', JSON.stringify({
-    email: payload.email,
-    username: payload.username,
-    first_name: payload.first_name,
-    last_name: payload.last_name,
-    cpf: payload.cpf,
-    phone_number: payload.phone_number,
-    role: 'cliente',
-  }))
-  
-  navigate('/')
+    clearErrors()
+    
+    // Remove formatação antes de enviar para API
+    const payload = {
+      ...data,
+      cpf: data.cpf ? unformatCPF(data.cpf) : '',
+      phone_number: data.phone_number ? unformatPhone(data.phone_number) : '',
+    }
+
+    try {
+      const response = await registerMutation.mutateAsync(payload);
+
+      const token = response.data?.access || response.data?.token || response.access; 
+    
+      if (token) {
+        localStorage.setItem("temp_access_token", token);
+      } 
+      
+      navigate("/");
+    } catch (error: any) {
+      // tratar erros da API aqui
+    }
+    
   }
 
   function handleCPFChange(e: React.ChangeEvent<HTMLInputElement>) {

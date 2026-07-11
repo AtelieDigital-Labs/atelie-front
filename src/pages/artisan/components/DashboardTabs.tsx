@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 const TABS = [
   { label: 'Dashboard', path: '/artisan/dashboard' },
-  { label: 'Sua Loja',  path: '/artisan/store/profile/:id' },
+  { label: 'Sua Loja',  path: '/artisan/store/profile' },
   { label: 'Produtos',  path: '/artisan/products' },
   { label: 'Pedidos',   path: '/artisan/orders' },
 ]

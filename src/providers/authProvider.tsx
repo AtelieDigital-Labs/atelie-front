@@ -1,38 +1,44 @@
-import React, {createContext, useState} from 'react'
+import React, { createContext } from "react";
+import { useCurrentUser } from "../hooks/accounts/useAuth";
+import type { User } from "../schemas/user";
 
-
-type User = {
-  name: string
-  role: 'client' | 'artisan'
-}
 type AuthContextType = {
-  user: User | null
-  isLoading: boolean
-}
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  refetchUser: () => void;
+};
 
 export const AuthContext = createContext<AuthContextType>({
-  user:null,
-  isLoading:false
-})
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  refetchUser: () => {},
+});
 
-export function AuthProvider({children}:{children: React.ReactNode}){
-  const [user] = useState<User | null>({
-    name:'Valdivania',
-    role:'client'
-  })
-
-  // DEPOIS — com session real
-  // const [user, setUser] = useState<User | null>(null)
-
-  // useEffect(() => {
-  //   const stored = localStorage.getItem('user')
-  //   if (stored) setUser(JSON.parse(stored))
-  // }, [])
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = useCurrentUser();
 
   return (
-    <AuthContext.Provider value={{user, isLoading: false}}>
+    <AuthContext.Provider
+      value={{
+        user: user ?? null,
+        isAuthenticated: !!user,
+        isLoading,
+        refetchUser: () => {
+          refetch();
+        },
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
-

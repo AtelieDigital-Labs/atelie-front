@@ -5,29 +5,7 @@ import type { Product } from '../../../../schemas/product'
 import { Button } from '../../../../components/ui/Button'
 import { ProductCard } from '../../../../components/ui/ProductCard'
 import {DashboardTabs} from '../../components/DashboardTabs'
-
-// Mock — depois API
-const MOCK_STORE: StorePublic = {
-  id: 1,
-  artisan_id: 'user-123',
-  name: 'Val Laços',
-  description: '🎀 Acessórios artesanais para meninas e mulheres\n✨ Feitos com amor, pensados com carinho\n🌟 Especial atenção ao universo infantil\n💝 Cada peça é um presente',
-  category: { id: 1, name: 'Acessórios' },
-  image: 'https://placehold.co/200x200?text=Val',
-  banner: 'https://placehold.co/1200x300?text=Banner',
-  address: {
-    id: 1,
-    street: 'Rua das Flores',
-    number: 100,
-    neighborhood: 'Centro',
-    city: 'Alexandria',
-    state: 'RN',
-    zip_code: '59965-000',
-    complement: null,
-  },
-  created_at: '2024-01-01T00:00:00',
-  updated_at: '2024-01-01T00:00:00',
-}
+import { useGetMeStore, useGetStore } from '../../../../hooks/catalogs/useStores'
 
 const MOCK_PRODUCTS: Product[] = [
   {
@@ -147,15 +125,44 @@ const MOCK_PRODUCTS: Product[] = [
 ]
 
 export function StoreProfile() {
-  const { id } = useParams()
+  const {id} = useParams()
+  
+  const storeId = id ? Number(id) : undefined;
 
-  const store = MOCK_STORE
+  const meStoreQuery = useGetMeStore({
+    enabled: storeId === undefined,
+  });
+
+  const storeQuery = useGetStore(storeId ?? 0, {
+    enabled: storeId !== undefined,
+  });
+
+  // 1. Condicional unificada e segura
+  const isSpecificStore = storeId !== undefined;
+  const store = isSpecificStore ? storeQuery.data : meStoreQuery.data;
+  const isLoading = isSpecificStore ? storeQuery.isLoading : meStoreQuery.isLoading;
+  const error = isSpecificStore ? storeQuery.error : meStoreQuery.error;
+
+ 
+if (isLoading) {
+  return <div>Carregando...</div>;
+}
+
+if (error) {
+  return <div>Erro ao carregar a loja.</div>;
+}
+
+if (!store) {
+  return <div>Loja não encontrada.</div>;
+}
   const products = MOCK_PRODUCTS
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className='mb-4'>
-        <DashboardTabs />
+        {!storeId && (
+          <DashboardTabs />
+        )}
 
       </div>
      
@@ -204,11 +211,11 @@ export function StoreProfile() {
             </p>
           </div>
 
-          <Link to="/artisan/store/edit">
+          {!storeId && (<Link to="/artisan/store/edit">
             <Button variant="primary" size="sm">
               Editar Loja
             </Button>
-          </Link>
+          </Link>)}
         </div>
 
         {/* Descrição */}

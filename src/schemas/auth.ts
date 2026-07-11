@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 
 export const userSchema = z.object({
-  pk: z.number(),
+  id: z.number(),
   email: z.string().pipe(z.email('Email inválido')),
   username: z.string().min(3, 'Username deve ter pelo menos 3 caracteres'),
   first_name: z.string(),

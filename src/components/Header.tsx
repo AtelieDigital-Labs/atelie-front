@@ -2,6 +2,7 @@ import { ShoppingCart, Heart, Store, User, ChevronDown, Menu } from 'lucide-reac
 import { Search } from './ui/Search'
 import {useNavigate, Link} from 'react-router-dom'
 import { useState } from 'react'
+import { useAuth } from '../hooks/useAuth'
 
 type HeaderProps = {
   username?: string
@@ -10,7 +11,6 @@ type HeaderProps = {
 const NAV_ICONS = [
   { icon: ShoppingCart, label: 'Carrinho', to: '/ShoppingCart' },
   { icon: Heart,        label: 'Favoritos', to: '/favorite' },
-  { icon: Store,        label: 'Lojas', to: '/artisan/dashboard' },
 ]
 
 const CATEGORIES = [
@@ -24,8 +24,9 @@ const CATEGORIES = [
 
 
 
-export function Header({ username = 'Usuário' }: HeaderProps) {
+export function Header() {
   const navigate = useNavigate()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [query, setQuery]= useState('')
 
   function handleSearch(e:  React.SubmitEvent<HTMLFormElement>){
@@ -60,6 +61,16 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
                 <Icon size={22} />
               </Link>
             ))}
+            
+            {user?.is_artisan &&(
+              <Link
+                aria-label='Lojas'
+                to="/artisan/dashboard"
+                className="hover:text-primary-dark transition-colors"
+              >
+                <Store size={22} />
+              </Link>
+            )}
 
             <Link to="/profile">
               <button
@@ -69,7 +80,11 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
                 "
               >
                 <User size={22} />
-                <span className="hidden sm:inline text-sm">{username}</span>
+                {isAuthenticated && user ? (
+                  <span className="hidden sm:inline text-sm">{user.username}</span>
+                ) : (
+                  <Link to='sign-in' className="hidden sm:inline text-sm">Sign-in</Link>
+                )}
                 <ChevronDown className="hidden sm:block" size={15} />
               </button>
             </Link>

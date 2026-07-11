@@ -6,6 +6,8 @@ import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
 import { ButtonGoogle } from '../../components/ui/GoogleButton'
 import logo from '../../assets/logo-creme.svg'
+import { useLogin } from '../../hooks/accounts/useAuth'
+import axios from 'axios'
 
 
 
@@ -17,6 +19,7 @@ const MOCK_USER = {
 
 export function SignIn() {
   const navigate = useNavigate()
+  const loginMutation = useLogin();
   
   const {
     register,
@@ -30,26 +33,51 @@ export function SignIn() {
   })
 
   async function onSubmit(data: SignInPayload) {
+  clearErrors();
 
-    clearErrors()
-
-    // Simula delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  try {
+    const response = await loginMutation.mutateAsync(data);
+  
+    // 2. Extraia o token da resposta do backend
+    const token = response.data?.access || response.data?.token || response.access; 
     
-    if (data.email === MOCK_USER.email && data.password === MOCK_USER.password) {
-      localStorage.setItem('user', JSON.stringify({ 
-        email: data.email, 
-        name: 'Valdivania', 
-        role: 'cliente' 
-      }))
-      navigate('/')
+    if (token) {
+      localStorage.setItem("temp_access_token", token);
+    }
+
+    navigate("/");
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const response = error.response.data;
+
+      if (response.non_field_errors) {
+        setError("password", {
+          type: "server",
+          message: response.non_field_errors[0],
+        });
+      }
+
+      if (response.email) {
+        setError("email", {
+          type: "server",
+          message: response.email[0],
+        });
+      }
+
+      if (response.password) {
+        setError("password", {
+          type: "server",
+          message: response.password[0],
+        });
+      }
     } else {
-      setError('password', { 
-        type: 'manual',
-        message: 'Email ou senha incorretos.' 
-      })
+      setError("password", {
+        type: "server",
+        message: "Não foi possível realizar o login.",
+      });
     }
   }
+}
 
   return (
     <div className="min-h-screen flex">

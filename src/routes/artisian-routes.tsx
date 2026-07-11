@@ -20,6 +20,7 @@ export function ArtisianRoutes(){
           <Route path='/artisan/products/edit/:id' element={<EditProduct />} />
           <Route path='/artisan/store/new' element={<NewStore />} />
           <Route path='/artisan/store/edit' element={<EditStore />} />
+          <Route path="/artisan/store/profile" element={<StoreProfile />} />
           <Route path='/artisan/store/profile/:id' element={<StoreProfile />} />
 
       </Route>

@@ -1,0 +1,28 @@
+import { api } from "../client";
+import {type Product} from '../../schemas/product'
+
+interface ProductsResponse {
+  products: Product[];
+}
+export async function listProducts() {
+  const response = await api.get<ProductsResponse>("/api/v1/catalog/products/");
+  return response.data.products;
+}
+
+export async function createProduct() {
+  const response = await api.post("/api/catalog/products");
+  return response.data;
+}
+
+export async function getProduct(productId: number){
+  const { data } = await api.get<Product>(
+    `/api/v1/catalog/products/${productId}`
+  );
+
+  return data;
+}
+
+export async function patchProduct() {
+  const response = await api.patch("/api/catalog/products");
+  return response.data;
+}
