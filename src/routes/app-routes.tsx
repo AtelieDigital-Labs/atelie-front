@@ -11,6 +11,7 @@ import { PaymentPage } from '../pages/app/checkout/payment'
 import { PaymentErrorPage } from '../pages/app/checkout/payment-erro'
 import {PaymentApprovedPage} from '../pages/app/checkout/PaymentApproved'
 import {OrderDetailPage} from '../pages/app/order/detail'
+import {OrdersListPage} from '../pages/app/order/list'
 
 
 export function AppRoutes(){
@@ -28,6 +29,7 @@ export function AppRoutes(){
         <Route path="/checkout/payment-error" element={<PaymentErrorPage />} />
         <Route path="/checkout/success/:checkoutGroupId" element={<PaymentApprovedPage />} />
         <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+        <Route path="/orders/list" element={<OrdersListPage/>}/>
 
       </Route>
     </Routes>
