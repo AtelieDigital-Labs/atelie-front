@@ -1,14 +1,14 @@
-import { ShoppingCart, Heart, Store, User, ChevronDown, Menu } from 'lucide-react'
+import { ShoppingCart, Heart, Store, User, ChevronDown, Menu, UserCircle, Package, LogOut } from 'lucide-react'
 import { Search } from './ui/Search'
 import {useNavigate, Link} from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 type HeaderProps = {
   username?: string
-}
+} 
 
 const NAV_ICONS = [
-  { icon: ShoppingCart, label: 'Carrinho', to: '/ShoppingCart' },
+  { icon: ShoppingCart, label: 'Carrinho', to: '/cart' },
   { icon: Heart,        label: 'Favoritos', to: '/favorite' },
   { icon: Store,        label: 'Lojas', to: '/artisan/dashboard' },
 ]
@@ -27,6 +27,8 @@ const CATEGORIES = [
 export function Header({ username = 'Usuário' }: HeaderProps) {
   const navigate = useNavigate()
   const [query, setQuery]= useState('')
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
 
   function handleSearch(e:  React.SubmitEvent<HTMLFormElement>){
     e.preventDefault()
@@ -34,6 +36,26 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
       navigate(`search?q=${encodeURIComponent(query.trim())}`)
     }
   }
+
+  function handleLogout() {
+    console.log('Logout realizado')
+    // Implementar lógica de logout real
+    // localStorage.removeItem('token')
+    // navigate('/login')
+    setIsProfileOpen(false)
+  }
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <header className="bg-card border-b-2 border-primary/20 ">
@@ -61,18 +83,47 @@ export function Header({ username = 'Usuário' }: HeaderProps) {
               </Link>
             ))}
 
-            <Link to="/profile">
+            <div className="relative" ref={profileRef}>
               <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
                 aria-label="Perfil"
-                className="flex items-center gap-1.5 hover:text-primary-dark transition-colors
-                cursor-pointer
-                "
+                className="flex items-center gap-1.5 hover:text-primary-dark transition-colors cursor-pointer"
               >
-                <User size={22} />
+                <User size={22}  />
                 <span className="hidden sm:inline text-sm">{username}</span>
                 <ChevronDown className="hidden sm:block" size={15} />
               </button>
-            </Link>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 text-sm text-text hover:bg-primary/5 transition-colors"
+                  >
+                    <UserCircle size={18} className='text-primary'  />
+                    <span className='text-primary' >Meu Perfil</span>
+                  </Link>
+                  
+                  <Link
+                    to="/orders/list"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 text-sm text-text hover:bg-primary/5 transition-colors "
+                  >
+                    <Package size={18} className='text-primary' />
+                    <span className='text-primary'>Meus Pedidos</span>
+                  </Link>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm text-danger hover:bg-red-50 transition-colors border-t border-border cursor-pointer rounded-b-lg"
+                  >
+                    <LogOut size={18} className='text-primary' />
+                    <span className='text-primary'>Sair</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           
