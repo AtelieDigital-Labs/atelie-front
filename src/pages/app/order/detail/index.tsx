@@ -132,7 +132,7 @@ export function OrderDetailPage() {
   const total = order.price + order.shipping_cost
 
   return (
-    <div className="max-w-xl mx-auto bg-card rounded-2xl p-6 flex flex-col gap-6">
+    <div className="max-w-2xl mx-auto bg-card rounded-2xl p-6 flex flex-col gap-6">
 
       {/* Header */}
       {(() => {
