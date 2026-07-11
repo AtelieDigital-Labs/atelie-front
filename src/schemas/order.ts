@@ -86,6 +86,7 @@ export type OrderGroup = OrderRead[]
 export const orderResponseSchema = z.object({
   order_id: z.number(),
   status: orderStatusSchema,
+  checkout_group_id: z.string(),
   created_at: z.coerce.date(),
 })
 
@@ -96,3 +97,16 @@ export const orderPaymentRequestSchema = z.object({
 })
 
 export type OrderPaymentRequest = z.infer<typeof orderPaymentRequestSchema>
+
+// wrapper genérico de paginação do fastapi_pagination
+export const pageSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+  z.object({
+    items: z.array(itemSchema),
+    total: z.number(),
+    page: z.number(),
+    size: z.number(),
+    pages: z.number(),
+  })
+
+export const ordersPageSchema = pageSchema(orderResponseSchema)
+export type OrdersPage = z.infer<typeof ordersPageSchema>
