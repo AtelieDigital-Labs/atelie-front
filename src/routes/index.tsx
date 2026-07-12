@@ -1,8 +1,9 @@
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { AppRoutes } from './app-routes'
 import {AuthRoutes} from './auth-routes'
 import {ArtisianRoutes} from './artisian-routes'
+
 
 
 export function Router() {
@@ -13,11 +14,11 @@ export function Router() {
   
   return (
     <BrowserRouter>
-      <AppRoutes />  
-      <AuthRoutes/>
-      <ArtisianRoutes/>
-   
-      
+      <Routes>
+        <Route path="/auth/*" element={<AuthRoutes />} />
+        <Route path="/artisan/*" element={<ArtisianRoutes />} />
+        <Route path="/*" element={<AppRoutes />} />
+      </Routes>
     </BrowserRouter>
   )
 }
