@@ -1,5 +1,9 @@
-import {Stars} from '../../../../components/ui/Stars'
+import { useState } from 'react'
+import { Stars } from '../../../../components/ui/Stars'
 import { ThumbsUp, User } from 'lucide-react'
+import { Button } from '../../../../components/ui/Button'
+import { ReviewModal } from './ReviewModal'
+import { deriveReviewTitle } from '../../../../utils/deriveReviewTitle'
 
 type Review = {
   id: number
@@ -16,8 +20,13 @@ type Review = {
 type ReviewSummaryProps = {
   average: number
   distribution: Record<1 | 2 | 3 | 4 | 5, number>
+  onAddReview: () => void
 }
 
+interface ReviewListProps {
+  variant?: string | undefined | null // vem da variação selecionada na ProductDetail
+  currentUserName?: string // vir de um hook de auth real
+}
 
 const MOCK_REVIEWS: Review[] = [
   {
@@ -51,7 +60,6 @@ const MOCK_REVIEWS: Review[] = [
     helpful: 7,
   },
 ]
-
 
 function ReviewCard({ review }: { review: Review }) {
   return (
@@ -91,30 +99,28 @@ function ReviewCard({ review }: { review: Review }) {
   )
 }
 
-function ReviewSummary({average, distribution}: ReviewSummaryProps){
+function ReviewSummary({ average, distribution, onAddReview }: ReviewSummaryProps) {
   const total = Object.values(distribution).reduce((sum, count) => sum + count, 0)
 
-  return(
+  return (
     <div className="flex flex-col gap-4 min-w-48">
-      {/* Nota média */}
       <div className="flex items-end gap-2">
-        <span className="font-title text-5xl text-primary">
+        <span className="text-5xl text-primary font-body font-bold">
           {average.toFixed(1)}
         </span>
         <div className='pb-1 flex flex-col'>
           <Stars rating={average}/>
-          <p className='text-xs text-text/50'>
+          <p className='text-xs text-text/50 font-body'>
             {total} avaliações
           </p>
         </div>
       </div>
 
-      {/* Barras de distribuição */}
       <div className='flex flex-col gap-2'>
-        { ([5,4,3,2,1] as const).map(star =>{
+        {([5, 4, 3, 2, 1] as const).map(star => {
           const count = distribution[star] ?? 0
-          const pct = total > 0 ?  (count/total) * 100 : 0
-          return(
+          const pct = total > 0 ? (count / total) * 100 : 0
+          return (
             <div key={star} className='flex items-center gap-2'>
               <span className='text-xs text-text/60 w-3 text-right'>{star}</span>
               <div className="flex-1 h-2.5 bg-surface rounded-full overflow-hidden border border-primary/20">
@@ -130,12 +136,36 @@ function ReviewSummary({average, distribution}: ReviewSummaryProps){
           )
         })}
       </div>
+
+      <Button onClick={onAddReview} className="cursor-pointer mt-1" size='md'>
+        Adicionar avaliação
+      </Button>
     </div>
   )
 }
 
-export function ReviewList(){
-  return(
+export function ReviewList({ variant, currentUserName }: ReviewListProps) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
+
+  async function handleSubmitReview(rating: number, comment: string) {
+    const newReview: Review = {
+      id: Date.now(), //  id real virá do backend na resposta do POST
+      author: currentUserName ?? 'Usuário', //  substituir por dado real do usuário autenticado
+      date: new Date().toLocaleDateString('pt-BR'), // idealmente o backend define o timestamp
+      rating,
+      title: deriveReviewTitle(comment),
+      variant, // vem da variação selecionada na página do produto
+      comment,
+      helpful: 0,
+    }
+
+    //  substituir por chamada real (ex: POST /reviews) quando a rota existir no backend
+    setReviews((prev) => [newReview, ...prev])
+    setModalOpen(false)
+  }
+
+  return (
     <section className="mt-12">
       <h2 className="text-2xl mb-6 font-bold">Avaliações dos clientes</h2>
 
@@ -143,16 +173,23 @@ export function ReviewList(){
         <ReviewSummary
           average={5.0}
           distribution={{ 5: 4, 4: 1, 3: 0, 2: 0, 1: 0 }}
+          onAddReview={() => setModalOpen(true)}
         />
 
-       <div className="flex flex-col gap-4 flex-1">
-          {MOCK_REVIEWS.map(review => (
+        <div className="flex flex-col gap-4 flex-1">
+          {reviews.map(review => (
             <ReviewCard key={review.id} review={review} />
           ))}
         </div>
-
       </div>
 
+      {modalOpen && (
+        <ReviewModal
+          variant={variant}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleSubmitReview}
+        />
+      )}
     </section>
   )
 }
