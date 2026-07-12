@@ -10,20 +10,21 @@ import {EditStore} from '../pages/artisan/store/edit/index'
 import {StoreProfile} from '../pages/artisan/store/profile/index'
 import {ArtisanOrderDetailPage} from '../pages/artisan/orders/detail'
 
+
 export function ArtisianRoutes(){
   return(
     <Routes>
       <Route element={<AppLayout/>}>
-          <Route path='/artisan/dashboard' element={<Dashboard/>} />
-          <Route path='/artisan/products' element={<ArtisanProducts/>} />
-          <Route path='/artisan/orders' element={<ArtisanOrders/>} />
-          <Route path='/artisan/orders/:orderId' element={<ArtisanOrderDetailPage/>} />
-          <Route path='/artisan/products/new' element={<NewProduct/>} />
-          <Route path='/artisan/products/edit/:id' element={<EditProduct />} />
-          <Route path='/artisan/store/new' element={<NewStore />} />
-          <Route path='/artisan/store/edit' element={<EditStore />} />
-          <Route path='/artisan/store/profile/:id' element={<StoreProfile />} />
-
+          <Route path='/dashboard' element={<Dashboard/>} />
+          <Route path='/products' element={<ArtisanProducts/>} />
+          <Route path='/orders' element={<ArtisanOrders/>} />
+          <Route path='/orders/:orderId' element={<ArtisanOrderDetailPage/>} />
+          <Route path='/products/new' element={<NewProduct/>} />
+          <Route path='/products/edit/:id' element={<EditProduct />} />
+          <Route path='/store/new' element={<NewStore />} />
+          <Route path='/store/edit' element={<EditStore />} />
+          <Route path='/store/profile/:id' element={<StoreProfile />} />
+          
       </Route>
     </Routes>
   )
