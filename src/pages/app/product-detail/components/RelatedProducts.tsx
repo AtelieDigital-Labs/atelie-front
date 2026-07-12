@@ -1,5 +1,5 @@
 import { ProductCard } from '../../../../components/ui/ProductCard'
-import type { Product } from '../../../../dtos/product'
+import type { Product } from '../../../../schemas/product'
 
 const MOCK_RELATED: Product[] = [
   {

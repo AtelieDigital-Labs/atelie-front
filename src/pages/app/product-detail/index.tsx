@@ -4,7 +4,7 @@ import { Stars } from '../../../components/ui/Stars'
 import { ProductGallery } from './components/ProductGallery'
 import { ReviewList } from './components/ReviewList'
 import { RelatedProducts } from './components/RelatedProducts'
-import type { Product } from '../../../dtos/product'
+import type { Product } from '../../../schemas/product'
 import {Button} from '../../../components/ui/Button'
 
 const MOCK_PRODUCT: Product = {
@@ -261,7 +261,8 @@ export function ProductDetail() {
         </div>
       </div>
 
-      <ReviewList />
+      
+      <ReviewList variant={selectedVariation.color} />
       <RelatedProducts />
 
     </div>
