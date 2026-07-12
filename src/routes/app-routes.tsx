@@ -12,6 +12,8 @@ import { PaymentErrorPage } from '../pages/app/checkout/payment-erro'
 import {PaymentApprovedPage} from '../pages/app/checkout/PaymentApproved'
 import {OrderDetailPage} from '../pages/app/order/detail'
 import {OrdersListPage} from '../pages/app/order/list'
+import {ForbiddenPage} from '../pages/errors/Forbidden'
+import {NotFoundPage} from '../pages/errors/NotFound'
 
 
 export function AppRoutes(){
@@ -30,8 +32,10 @@ export function AppRoutes(){
         <Route path="/checkout/success/:checkoutGroupId" element={<PaymentApprovedPage />} />
         <Route path="/orders/:orderId" element={<OrderDetailPage />} />
         <Route path="/orders/list" element={<OrdersListPage/>}/>
-
+        <Route path="/403" element={<ForbiddenPage />} />
       </Route>
+      
+        <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
