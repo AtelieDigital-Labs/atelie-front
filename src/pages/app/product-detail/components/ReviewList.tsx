@@ -3,6 +3,7 @@ import { Stars } from '../../../../components/ui/Stars'
 import { ThumbsUp, User } from 'lucide-react'
 import { Button } from '../../../../components/ui/Button'
 import { ReviewModal } from './ReviewModal'
+import { ReviewSummaryAI } from './ReviewSummaryAI'
 import { deriveReviewTitle } from '../../../../utils/deriveReviewTitle'
 
 type Review = {
@@ -24,9 +25,11 @@ type ReviewSummaryProps = {
 }
 
 interface ReviewListProps {
-  variant?: string | undefined | null // vem da variação selecionada na ProductDetail
-  currentUserName?: string // vir de um hook de auth real
+  productId: number 
+  variant?: string | undefined | null 
+  currentUserName?: string 
 }
+
 
 const MOCK_REVIEWS: Review[] = [
   {
@@ -144,42 +147,62 @@ function ReviewSummary({ average, distribution, onAddReview }: ReviewSummaryProp
   )
 }
 
-export function ReviewList({ variant, currentUserName }: ReviewListProps) {
+export function ReviewList({ productId, variant, currentUserName }: ReviewListProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
 
+  // calcula a média e a distribuição a partir das reviews atuais
+  const average = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0
+
+  const distribution = reviews.reduce(
+    (acc, review) => {
+      const star = review.rating as 1 | 2 | 3 | 4 | 5
+      acc[star] = (acc[star] ?? 0) + 1
+      return acc
+    },
+    { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } as Record<1 | 2 | 3 | 4 | 5, number>
+  )
+
   async function handleSubmitReview(rating: number, comment: string) {
     const newReview: Review = {
-      id: Date.now(), //  id real virá do backend na resposta do POST
-      author: currentUserName ?? 'Usuário', //  substituir por dado real do usuário autenticado
-      date: new Date().toLocaleDateString('pt-BR'), // idealmente o backend define o timestamp
+      id: Date.now(),
+      author: currentUserName ?? 'Usuário',
+      date: new Date().toLocaleDateString('pt-BR'),
       rating,
       title: deriveReviewTitle(comment),
-      variant, // vem da variação selecionada na página do produto
+      variant,
       comment,
       helpful: 0,
     }
 
-    //  substituir por chamada real (ex: POST /reviews) quando a rota existir no backend
+    // TODO: trocar por chamada real...
     setReviews((prev) => [newReview, ...prev])
     setModalOpen(false)
   }
 
   return (
-    <section className="mt-12">
-      <h2 className="text-2xl mb-6 font-bold">Avaliações dos clientes</h2>
+    <section className="mt-12 flex flex-col gap-10">
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        <ReviewSummary
-          average={5.0}
-          distribution={{ 5: 4, 4: 1, 3: 0, 2: 0, 1: 0 }}
-          onAddReview={() => setModalOpen(true)}
-        />
+      <div>
+        <h2 className="text-2xl mb-6 font-bold">Avaliações dos clientes</h2>
 
-        <div className="flex flex-col gap-4 flex-1">
-          {reviews.map(review => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <ReviewSummary
+            average={average}
+            distribution={distribution}
+            onAddReview={() => setModalOpen(true)}
+          />
+          <div className='flex flex-col gap-12'>
+            <ReviewSummaryAI productId={productId} reviewCount={reviews.length} />  
+            <div className="flex flex-col gap-4 flex-1">
+              {reviews.map(review => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+
+          </div>
         </div>
       </div>
 

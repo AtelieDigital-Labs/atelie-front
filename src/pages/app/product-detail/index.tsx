@@ -242,7 +242,7 @@ if (!data || !selectedVariation) {
       </div>
 
       
-      <ReviewList variant={selectedVariation.color} />
+      <ReviewList productId={product.id} />
       <RelatedProducts />
 
     </div>
