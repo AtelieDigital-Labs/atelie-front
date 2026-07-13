@@ -458,7 +458,7 @@ export function StoreForm({ mode }: StoreFormProps) {
           <Button
             type="button"
             variant="danger"
-            onClick={() => navigate('/artisan/dashboard')}
+            onClick={() => navigate(-1)}
           >
             Cancelar
           </Button>
