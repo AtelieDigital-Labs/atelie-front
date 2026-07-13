@@ -16,7 +16,7 @@ export function PaymentErrorPage() {
       </div>
       <h2 className="text-lg font-bold text-text">Não foi possível gerar o pagamento</h2>
       <p className="text-sm text-text/60">{message}</p>
-      <Button fullWidth onClick={() => navigate('/client/orders')} className="cursor-pointer">
+      <Button fullWidth onClick={() => navigate('/orders/list')} className="cursor-pointer">
        Meus Pedidos
       </Button>
     </div>
