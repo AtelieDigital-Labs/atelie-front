@@ -67,7 +67,7 @@ export function Profile() {
               px-5 py-2 rounded-full text-sm font-medium transition-colors border
               ${activeTab === tab.key
                 ? 'bg-warning text-white border-warning shadow-md'
-                : 'border-primary/20 text-text/60 hover:border-primary/40 hover:text-primary shadow-md'
+                : 'border-primary/20 text-text/60 hover:border-primary/40 hover:text-primary '
               }
             `}
           >

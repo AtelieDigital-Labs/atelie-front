@@ -19,8 +19,8 @@ export function DashboardTabs() {
           className={`
             px-5 py-2 rounded-full text-sm font-medium transition-colors border
             ${pathname === tab.path
-              ? 'border-primary text-primary'
-              : 'border-transparent text-text/60 hover:text-primary hover:border-primary/30'
+              ? 'border-primary text-primary shadow-md'
+              : 'border-transparent text-text/60 hover:text-primary hover:border-primary/30 '
             }
           `}
         >
