@@ -29,7 +29,6 @@ export async function getCurrentUser(): Promise<User> {
   const response = await api.get<User>(
     "/api/v1/accounts/me/",
   );
-  console.log(response)
 
   return response.data;
 }

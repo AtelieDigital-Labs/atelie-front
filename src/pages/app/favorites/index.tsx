@@ -9,10 +9,11 @@ import { useProductsFavorites } from '../../../hooks/catalogs/useProducts'
 
 export function Favorites() {
   const {data:favorites} = useFavorites()
+  // console.log(favorites)
   const productIds = favorites?.map(favorite => favorite.product_id) ?? []
-
+  console.log(productIds)
   const { data: products } = useProductsFavorites(productIds)
-  
+  console.log(products)
 
   // function handleRemove(productId: number) {
   //   // mock — quando integrar: DELETE /favorites/{product_id}

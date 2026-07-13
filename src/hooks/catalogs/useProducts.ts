@@ -1,6 +1,6 @@
 // hooks/catalog/useProducts.ts
 import { useQuery } from "@tanstack/react-query";
-import { listProducts, getProduct } from "../../api/catalogs/products";
+import { listProducts, getProduct, listProductsFavorites } from "../../api/catalogs/products";
 
 
 export function useProducts() {
@@ -18,10 +18,10 @@ export function useProduct(productId: number) {
   });
 }
 
-export function useProductsFavorites(data: number[]) {
+export function useProductsFavorites(ids: number[]) {
   return useQuery({
-    queryKey: ["product-favorites"],
-    queryFn: () => listProductsFavorites(data),
-    enabled: !!data,
+    queryKey: ["product-favorites", ids],
+    queryFn: () => listProductsFavorites(ids),
+    enabled: ids.length > 0,
   });
 }

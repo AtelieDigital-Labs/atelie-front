@@ -4,6 +4,7 @@ import { Input } from '../../../components/ui/Input'
 import { Button } from '../../../components/ui/Button'
 import type { User, UserUpdate } from '../../../schemas/user'
 import { formatCPF, formatPhone, unformatPhone } from '../../../utils/formatters'
+import { useUpdateProfile } from '../../../hooks/accounts/useUsers'
 
 type PersonalDataProps = {
   user: User
@@ -23,6 +24,7 @@ export function PersonalData({ user }: PersonalDataProps) {
   // Estados para upload de avatar
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const profileMutation = useUpdateProfile()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
@@ -65,33 +67,36 @@ export function PersonalData({ user }: PersonalDataProps) {
     setAvatarFile(file)
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    
-    // Remove formatação do telefone antes de enviar
-    const payload = {
-      ...form,
-      phone_number: form.phone_number ? unformatPhone(form.phone_number) : form.phone_number,
-    }
+  async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
 
-  
+  const payload = {
+    ...form,
+    phone_number: form.phone_number
+      ? unformatPhone(form.phone_number)
+      : form.phone_number,
+  };
+
+  try {
     if (avatarFile) {
-      const formData = new FormData()
-      formData.append('avatar', avatarFile)
-      formData.append('data', JSON.stringify(payload))
-      
-      // TODO: Quando integrar com API
-      // await api.patch('/accounts/me/', formData, {
-      //   headers: { 'Content-Type': 'multipart/form-data' }
-      // })
-      console.log('Enviar com foto:', formData)
+      const formData = new FormData();
+
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+
+      formData.append("profile_image", avatarFile);
+
+      await profileMutation.mutateAsync(formData);
     } else {
-      // Envia só os dados do formulário
-      // TODO: Quando integrar com API
-      // await api.patch('/accounts/me/', payload)
-      console.log('Atualizar perfil:', payload)
+      await profileMutation.mutateAsync(payload);
     }
+  } catch (error) {
+    console.error(error);
   }
+}
 
   return (
     <div className="bg-card rounded-2xl p-6 flex-1 flex-col gap-6">
@@ -198,7 +203,15 @@ export function PersonalData({ user }: PersonalDataProps) {
         />
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" size="sm">Salvar alterações</Button>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={profileMutation.isPending}
+          >
+            {profileMutation.isPending
+              ? "Salvando..."
+              : "Salvar alterações"}
+          </Button>
         </div>
       </form>
     </div>

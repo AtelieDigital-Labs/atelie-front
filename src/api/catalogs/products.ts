@@ -31,3 +31,10 @@ export async function getProductVariation(variationId: number) {
   );
   return data;
 }
+export async function listProductsFavorites(productsIds: number[]){
+  const { data } = await api.post<ProductsResponse>(
+    `/api/v1/catalog/products/me/favorites`, productsIds
+  );
+
+  return data.products;
+}
