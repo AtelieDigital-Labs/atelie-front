@@ -7,18 +7,21 @@ import { RelatedProducts } from './components/RelatedProducts'
 import {Button} from '../../../components/ui/Button'
 import { useProduct } from '../../../hooks/catalogs/useProducts'
 import { useParams } from 'react-router-dom'
+import {useAddCartItem} from '../../../hooks/orders/useCart'
 
 
 export function ProductDetail() {
   const { id } = useParams();
-
   const productId = Number(id);
 
   const { data, isPending, error } = useProduct(productId);
+  const addCartItem = useAddCartItem();
 
   const [selectedVariation, setSelectedVariation] = useState<any | null>(null);
+
   const [selectedImage, setSelectedImage] = useState<any | null>(null);
   const [quantity, setQuantity] = useState(1);
+  
   useEffect(() => {
     if (!data || selectedVariation) return;
 
@@ -38,6 +41,26 @@ if (error) return <p>Erro</p>;
 if (!data || !selectedVariation) {
   return <p>Produto não encontrado.</p>;
 }
+
+  function handleAddToCart() {
+    if (!selectedVariation) return;
+
+    addCartItem.mutate(
+      {
+        product_variant_id: String(selectedVariation.id),
+        quantity,
+      },
+      {
+        onSuccess: (result) => {
+          // result: { product_variant_id, quantity, message }
+          console.log(result.message); // trocar por toast quando tiver um sistema de notificação
+        },
+        onError: () => {
+          console.log('Erro ao adicionar ao carrinho');
+        },
+      }
+    );
+  }
   const price = selectedVariation.price
   const originalPrice = data.discount
     ? price / (1 - data.discount / 100)
@@ -175,7 +198,12 @@ if (!data || !selectedVariation) {
 
             {/* Botões */}
             <div className="flex gap-3">
-              <Button variant='warning' fullWidth>
+              <Button 
+                variant='warning'
+                fullWidth
+                onClick={handleAddToCart}
+                disabled={addCartItem.isPending}
+                >
                  Adicionar ao carrinho
               </Button>
 
