@@ -25,6 +25,8 @@ export function AppRoutes(){
         <Route path="/favorite" element={<Favorites />} /> 
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/address" element={<Profile />} />
+        <Route path="/profile/change-artisan" element={<Profile />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout/shipping" element={<ShippingPage />} />
         <Route path="/checkout/payment" element={<PaymentPage />} />
