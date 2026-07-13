@@ -130,29 +130,30 @@ export function ArtisanProducts() {
     ),
   },
   {
-    key: 'actions',
-    label: 'Ações',
-    render: (row: ArtisanProduct) => (
-      <div className="flex items-center gap-3">
-        <Link to={`/artisan/products/edit/${row.id}`}>
-          <button aria-label="Editar" className="text-warning hover:text-warning/70 transition-colors cursor-pointer">
-            <Pencil size={16} />
-          </button>
-        </Link>
-
-        
-        
-        <button 
-          aria-label="Excluir" 
-          className="text-danger hover:text-danger-dark transition-colors justify-end cursor-pointer"
-          onClick={() => handleOpenDeleteModal(row)}
-        >
-          <Trash2 size={16} />
-        </button>
+      key: 'actions',
+      label: 'Ações',
+      render: (row: ArtisanProduct) => (
       
-      </div>
-    ),
-  },
+        <div className="flex items-center justify-center gap-3">
+          
+          <Link 
+            to={`/artisan/products/edit/${row.id}`}
+            className="inline-flex items-center justify-center text-warning hover:text-warning/70 transition-colors cursor-pointer"
+          >
+            <Pencil size={16} />
+          </Link> 
+
+          <button 
+            aria-label="Excluir" 
+            className="inline-flex items-center justify-center text-danger hover:text-danger-dark transition-colors cursor-pointer"
+            onClick={() => handleOpenDeleteModal(row)}
+          >
+            <Trash2 size={16} />
+          </button>
+        
+        </div>
+      ),
+    }
   ]
 
   return (
@@ -164,7 +165,7 @@ export function ArtisanProducts() {
         data={paginated}
         emptyMessage="Nenhum produto cadastrado"
       />
-
+    
       <div className="flex items-center justify-end">
         <Button size="md" variant="success" onClick={()=> navigate('/artisan/products/new')}>
           Adicionar Produto
