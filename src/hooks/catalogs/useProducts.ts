@@ -18,10 +18,10 @@ export function useProduct(productId: number) {
   });
 }
 
-// export function useProductsFavorites(data: number[]) {
-//   return useQuery({
-//     queryKey: ["product-favorites"],
-//     queryFn: () => listProductsFavorites(data),
-//     enabled: !!data,
-//   });
-// }
+export function useProductsFavorites(data: number[]) {
+  return useQuery({
+    queryKey: ["product-favorites"],
+    queryFn: () => listProductsFavorites(data),
+    enabled: !!data,
+  });
+}
