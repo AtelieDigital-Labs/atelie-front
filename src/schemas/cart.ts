@@ -26,11 +26,20 @@ export const cartItemUpdateSchema = z.object({
   quantity: z.number().int().min(0),
 })
 
+
+// espelha CartItemReadUpdated (retorno real de POST /items e PATCH /items/{id})
+export const cartItemReadUpdatedSchema = z.object({
+  product_variant_id: z.string(),
+  quantity: z.number().int(),
+  message: z.string(),
+})
+
+
 export type CartItemRead = z.infer<typeof cartItemReadSchema>
 export type CartResponse = z.infer<typeof cartResponseSchema>
 export type CartItemCreate = z.infer<typeof cartItemCreateSchema>
 export type CartItemUpdate = z.infer<typeof cartItemUpdateSchema>
-
+export type CartItemReadUpdated = z.infer<typeof cartItemReadUpdatedSchema>
 
 export type CartItemDisplay = CartItemRead & {
   name: string
