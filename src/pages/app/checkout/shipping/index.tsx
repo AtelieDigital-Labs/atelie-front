@@ -168,7 +168,7 @@ export function ShippingPage() {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/profile/address')}
                 className="w-full sm:w-auto"
               >
                 Adicionar Novo Endereço

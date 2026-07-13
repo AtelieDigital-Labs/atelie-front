@@ -244,7 +244,7 @@ export function OrderDetailPage() {
       <Button
         variant="secondary"
         fullWidth
-        onClick={() => navigate('/client/orders')}
+        onClick={() => navigate('/orders/list')}
         className="cursor-pointer"
       >
         Acompanhar Meus Pedidos

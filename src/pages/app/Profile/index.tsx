@@ -1,14 +1,16 @@
-import {useState} from 'react'
-import type {User, Address} from '../../../schemas/user'
-import {PersonalData} from './PersonalData'
-import {AddressTab} from './AdressTab'
+import { useNavigate, useLocation } from 'react-router-dom'
+import type { User, Address } from '../../../schemas/user'
+import { PersonalData } from './PersonalData'
+import { AddressTab } from './AddressTab' 
+import { BecomeArtisan } from './BecomeArtisan'
 
-type Tab ='personal' | 'address'
+type Tab = 'personal' | 'address' | 'artisan'
 
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'personal', label: 'Dados Pessoais' },
-  { key: 'address',  label: 'Endereço' },
+const TABS: { key: Tab; label: string; path: string }[] = [
+  { key: 'personal', label: 'Dados Pessoais', path: '/profile' },
+  { key: 'address', label: 'Endereço', path: '/profile/address' },
+  { key: 'artisan', label: 'Mudar para vendedor', path: '/profile/change-artisan' },
 ]
 
 const MOCK_USER: User = {
@@ -39,25 +41,33 @@ const MOCK_ADDRESSES: Address[] = [
   },
 ]
 
-
 export function Profile() {
-  const [activeTab, setActiveTab] = useState<Tab>('personal')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Descobrimos a aba ativa olhando para a URL atual
+  const activeTab = TABS.find(tab => location.pathname === tab.path)?.key || 'personal'
+
+  // Função que navega para o path da aba clicada
+  const handleTabChange = (path: string) => {
+    navigate(path)
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <h2 className="font-title text-2xl text-primary">Configurações do Perfil</h2>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {TABS.map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => handleTabChange(tab.path)} // Usa o path aqui
             className={`
               px-5 py-2 rounded-full text-sm font-medium transition-colors border
               ${activeTab === tab.key
-                ? 'bg-warning text-white border-warning'
-                : 'border-primary/20 text-text/60 hover:border-primary/40 hover:text-primary'
+                ? 'bg-warning text-white border-warning shadow-md'
+                : 'border-primary/20 text-text/60 hover:border-primary/40 hover:text-primary '
               }
             `}
           >
@@ -66,13 +76,10 @@ export function Profile() {
         ))}
       </div>
 
-      {activeTab === 'personal' && (
-        <PersonalData user={MOCK_USER} />
-      )}
-
-      {activeTab === 'address' && (
-        <AddressTab initialAddresses={MOCK_ADDRESSES} />
-      )}
+      {/* Renderização condicional baseada na aba ativa */}
+      {activeTab === 'personal' && <PersonalData user={MOCK_USER} />}
+      {activeTab === 'address' && <AddressTab initialAddresses={MOCK_ADDRESSES} />}
+      {activeTab === 'artisan' && <BecomeArtisan />}
     </div>
   )
 }

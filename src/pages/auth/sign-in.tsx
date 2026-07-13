@@ -110,7 +110,7 @@ export function SignIn() {
 
           <p className="text-center text-sm text-text/60">
             Você não tem uma conta?{' '}
-            <Link to="/sign-up" className="text-primary font-semibold hover:underline">
+            <Link to="/auth/sign-up" className="text-primary font-semibold hover:underline">
               Cadastre-se
             </Link>
           </p>
