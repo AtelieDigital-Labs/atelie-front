@@ -1,10 +1,7 @@
 import { api } from "../client";
-import {type Product} from '../../schemas/product'
+import {type Product, type ProductsResponse} from '../../schemas/product'
 
-interface ProductsResponse {
-  products: Product[];
-}
-export async function listProducts() {
+export async function listProducts(): Promise<Product[]> {
   const response = await api.get<ProductsResponse>("/api/v1/catalog/products/");
   return response.data.products;
 }

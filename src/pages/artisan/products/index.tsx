@@ -6,6 +6,8 @@ import { Pagination } from '../../../components/ui/Pagination'
 import { Button } from '../../../components/ui/Button'
 import { DashboardTabs } from '../components/DashboardTabs'
 import { ConfirmModal } from '../../../components/ui/ConfirmModal'
+import { useGetMeStoreProducts } from '../../../hooks/catalogs/useStores'
+import type { Product } from '../../../schemas/product'
 
 
 type ArtisanProduct = {
@@ -17,13 +19,13 @@ type ArtisanProduct = {
   image?: string
 }
 
-const MOCK_PRODUCTS: ArtisanProduct[] = [
-  { id: 1, name: 'Laço Borboleta', price: 28.00, stock: 0, is_active: true },
-  { id: 2, name: 'Laço Infantil Clássico Princesa', price: 30.00, stock: 0, is_active: true },
-  { id: 3, name: 'Laço Crinol', price: 30.00, stock: 0, is_active: true },
-  { id: 4, name: 'Laço parzinho cinderela', price: 38.00, stock: 0, is_active: true },
-  { id: 5, name: 'Laço Infantil Brilho Suave Encantado', price: 30.00, stock: 10, is_active: true },
-]
+// const MOCK_PRODUCTS: ArtisanProduct[] = [
+//   { id: 1, name: 'Laço Borboleta', price: 28.00, stock: 0, is_active: true },
+//   { id: 2, name: 'Laço Infantil Clássico Princesa', price: 30.00, stock: 0, is_active: true },
+//   { id: 3, name: 'Laço Crinol', price: 30.00, stock: 0, is_active: true },
+//   { id: 4, name: 'Laço parzinho cinderela', price: 38.00, stock: 0, is_active: true },
+//   { id: 5, name: 'Laço Infantil Brilho Suave Encantado', price: 30.00, stock: 10, is_active: true },
+// ]
 
 
 
@@ -32,14 +34,26 @@ const ITEMS_PER_PAGE = 4
 export function ArtisanProducts() {
   const [page, setPage] = useState(1)
   const navigate = useNavigate()
-
+  const {data: products = [], isPending, error} = useGetMeStoreProducts({
+    enabled: true
+    });
+    if (isPending) {
+  return <div>Carregando...</div>
+}
+if (error) {
+  return <div>erro...</div>
+}
   // Estados para o modal 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<ArtisanProduct | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  console.log(products)
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE)
 
-  const totalPages = Math.ceil(MOCK_PRODUCTS.length / ITEMS_PER_PAGE)
-  const paginated = MOCK_PRODUCTS.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  const paginated = products.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
+  )
 
 
    // Abre o modal com o produto selecionado
@@ -84,11 +98,11 @@ export function ArtisanProducts() {
   {
     key: 'name',
     label: 'Nome do Produto',
-    render: (row: ArtisanProduct) => (
+    render: (row: Product) => (
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-surface shrink-0 overflow-hidden">
-          {row.image
-            ? <img src={row.image} alt={row.name} className="w-full h-full object-cover" />
+          {row.variations[0].images[0]
+            ? <img src={row.variations[0].images[0].url} alt={row.name} className="w-full h-full object-cover" />
             : <div className="w-full h-full bg-primary/10" />
           }
         </div>
@@ -99,18 +113,18 @@ export function ArtisanProducts() {
   {
     key: 'price',
     label: 'Preço',
-    render: (row: ArtisanProduct) => (
+    render: (row: Product) => (
       <span className="text-primary font-semibold">
-        R$ {row.price.toFixed(2).replace('.', ',')}
+        {row.variations[0].price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
       </span>
     ),
   },
   {
     key: 'stock',
     label: 'Estoque',
-    render: (row: ArtisanProduct) => (
-      <span className={row.stock === 0 ? 'text-text/40' : 'text-text'}>
-        {row.stock === 0 ? 'None unid.' : `${row.stock} unid.`}
+    render: (row: Product) => (
+      <span className={row.variations[0].stock === 0 ? 'text-text/40' : 'text-text'}>
+        {row.variations[0].stock === 0 ? 'None unid.' : `${row.variations[0].stock} unid.`}
       </span>
     ),
   },

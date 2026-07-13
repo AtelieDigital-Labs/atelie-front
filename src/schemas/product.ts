@@ -82,3 +82,6 @@ export const productCreateSchema = z.object({
 
 export type Product = z.infer<typeof productSchema>
 export type ProductCreate = z.infer<typeof productCreateSchema>
+export interface ProductsResponse {
+  products: Product[];
+}

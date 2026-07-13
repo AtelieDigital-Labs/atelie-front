@@ -5,124 +5,8 @@ import type { Product } from '../../../../schemas/product'
 import { Button } from '../../../../components/ui/Button'
 import { ProductCard } from '../../../../components/ui/ProductCard'
 import {DashboardTabs} from '../../components/DashboardTabs'
-import { useGetMeStore, useGetStore } from '../../../../hooks/catalogs/useStores'
+import { useGetMeStore, useGetMeStoreProducts, useGetStore, useGetStoreProducts } from '../../../../hooks/catalogs/useStores'
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: 1,
-    name: 'Kit faixinhas rosas',
-    description: 'Kit com 3 faixinhas em tons de rosa',
-    store_id: 1,
-    is_active: true,
-    shopName: 'Val Laços',
-    rating: 5,
-    reviewCount: 24,
-    monthlySales: 'Mais de 50 vendas no mês',
-    discount: 10,
-    deliveryDate: 'qui., 12 de jun.',
-    freeShipping: true,
-    variations: [
-      {
-        id: 1,
-        price: 83.50,
-        stock: 15,
-        color: 'Rosa',
-        size: 'U',
-        weight: 0.1,
-        length: 10,
-        width: 8,
-        height: 2,
-        sku: 'KIT-001',
-        images: [{ id: 1, url: 'https://placehold.co/400x400?text=Kit+Rosas', is_primary: true }],
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Laço pérola com pontas',
-    description: 'Laço delicado com detalhes em pérola',
-    store_id: 1,
-    is_active: true,
-    shopName: 'Val Laços',
-    rating: 4.5,
-    reviewCount: 18,
-    monthlySales: 'Mais de 30 vendas no mês',
-    discount: 5,
-    deliveryDate: 'qui., 12 de jun.',
-    freeShipping: true,
-    variations: [
-      {
-        id: 2,
-        price: 40.70,
-        stock: 20,
-        color: 'Branco',
-        size: 'U',
-        weight: 0.05,
-        length: 10,
-        width: 8,
-        height: 2,
-        sku: 'LAC-002',
-        images: [{ id: 2, url: 'https://placehold.co/400x400?text=Laco+Perola', is_primary: true }],
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Tiara Boutique Duplo',
-    description: 'Tiara dupla em cetim premium',
-    store_id: 1,
-    is_active: true,
-    shopName: 'Val Laços',
-    rating: 5,
-    reviewCount: 32,
-    monthlySales: 'Mais de 80 vendas no mês',
-    deliveryDate: 'ter., 17 de jun.',
-    fastDelivery: true,
-    variations: [
-      {
-        id: 3,
-        price: 40.00,
-        stock: 10,
-        color: 'Roxo',
-        size: 'U',
-        weight: 0.05,
-        length: 15,
-        width: 5,
-        height: 3,
-        sku: 'TIA-003',
-        images: [{ id: 3, url: 'https://placehold.co/400x400?text=Tiara+Roxa', is_primary: true }],
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Laço Infantil Clássico Princesa',
-    description: 'Laço artesanal feito à mão em cetim premium',
-    store_id: 1,
-    is_active: true,
-    shopName: 'Val Laços',
-    rating: 4,
-    reviewCount: 15,
-    monthlySales: 'Mais de 25 vendas no mês',
-    deliveryDate: 'sex., 13 de jun.',
-    freeShipping: false,
-    variations: [
-      {
-        id: 4,
-        price: 30.00,
-        stock: 25,
-        color: 'Rosa',
-        size: 'U',
-        weight: 0.1,
-        length: 10,
-        width: 8,
-        height: 2,
-        sku: 'LAC-004',
-        images: [{ id: 4, url: 'https://placehold.co/400x400?text=Laco+Classico', is_primary: true }],
-      },
-    ],
-  },
-]
 
 export function StoreProfile() {
   const {id} = useParams()
@@ -137,9 +21,20 @@ export function StoreProfile() {
     enabled: storeId !== undefined,
   });
 
+  const meStoreProductsQuery = useGetMeStoreProducts({
+    enabled: storeId === undefined,
+  });
+
+  const storeProductsQuery = useGetStoreProducts(storeId ?? 0, {
+    enabled: storeId !== undefined,
+  });
+
+
+
   // 1. Condicional unificada e segura
   const isSpecificStore = storeId !== undefined;
   const store = isSpecificStore ? storeQuery.data : meStoreQuery.data;
+  const products = isSpecificStore ? storeProductsQuery.data : meStoreProductsQuery.data;
   const isLoading = isSpecificStore ? storeQuery.isLoading : meStoreQuery.isLoading;
   const error = isSpecificStore ? storeQuery.error : meStoreQuery.error;
 
@@ -155,7 +50,6 @@ if (error) {
 if (!store) {
   return <div>Loja não encontrada.</div>;
 }
-  const products = MOCK_PRODUCTS
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -243,16 +137,16 @@ if (!store) {
       {/* Produtos */}
       <div className="mt-10 px-6 md:px-10">
         <h2 className="font-title text-xl font-bold text-text mb-6">
-          Produtos ({products.length})
+          Produtos ({products?.length})
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map(product => (
-            <ProductCard key={product.id} product={product} />
+          {products?.map(product => (
+            <ProductCard key={product.id} product={product} isOwner={true} />
           ))}
         </div>
 
-        {products.length === 0 && (
+        {products?.length === 0 && (
           <div className="text-center py-12">
             <p className="text-text/60">Esta loja ainda não tem produtos</p>
           </div>

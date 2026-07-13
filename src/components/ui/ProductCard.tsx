@@ -28,11 +28,11 @@ function formatPrice(price: number): string {
 
 type ProductCardProps = {
   product: Product
+  isOwner?: boolean 
   onRemoveFavorite?: () => void 
 }
 
-export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
-  const favoriteMutation = useCreateIsFavorite()
+export function ProductCard({ product, onRemoveFavorite, isOwner = false }: ProductCardProps) {
   const imageUrl = getPrimaryImage(product.variations)
   const price = getLowestPrice(product.variations)
   const badge = product.freeShipping
@@ -53,7 +53,7 @@ export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
           </span>
         )}
 
-        <div className="absolute top-3 right-3">
+        {/* <div className="absolute top-3 right-3">
           <FavoriteButton 
             initialFavorite={product.is_favorite}  // na lista de favoritos já está favoritado
             onChange={(fav) => {
@@ -65,7 +65,7 @@ export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
               }
             }}
           />
-        </div>
+        </div> */}
 
         {imageUrl ? (
           <img
@@ -131,7 +131,9 @@ export function ProductCard({ product, onRemoveFavorite }: ProductCardProps) {
 
       </div>
     </Link>
+    {!isOwner && (
           <Button variant='secondary' className='Adicionar'>Adicionar</Button>
+    )}
     </div>
   )
 }

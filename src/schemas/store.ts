@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { Product } from './product'
 
 export const addressSchema = z.object({
   street: z.string().min(1, 'Rua é obrigatória').max(255),
@@ -24,8 +25,8 @@ export const storeCreateSchema = z.object({
     .optional()
     .nullable(),
   category_id: z.number().min(1, 'Selecione uma categoria'),
-  image: z.string().max(255).optional().nullable(),
-  banner: z.string().max(255).optional().nullable(),
+  image: z.instanceof(FileList).optional().nullable(),
+  banner: z.instanceof(FileList).optional().nullable(),
   pix_key: z.string()
     .min(1, 'Chave PIX é obrigatória')
     .max(150),
@@ -57,8 +58,8 @@ export const addressUpdateSchema = z.object({
 
 export const storeUpdateSchema = z.object({
   description: z.string().max(500).nullable().optional(),
-  image: z.string().max(255).nullable().optional(),
-  banner: z.string().max(255).nullable().optional(),
+  image: z.instanceof(FileList).nullable().optional(),
+  banner: z.instanceof(FileList).nullable().optional(),
   address: addressUpdateSchema.optional(),
 })
 
@@ -70,3 +71,6 @@ export type StoreCreate = z.infer<typeof storeCreateSchema>
 export type StorePublic = z.infer<typeof storePublicSchema>
 export type AddressUpdate = z.infer<typeof addressUpdateSchema>
 export type StoreUpdate = z.infer<typeof storeUpdateSchema>
+export interface StoreWithProducts extends StorePublic {
+  products: Product[];
+}
