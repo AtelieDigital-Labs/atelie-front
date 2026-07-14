@@ -32,10 +32,10 @@ export function useCartWithDetails() {
   });
 
   const isPending =
-    isCartPending ||
-    variationQueries.some((q) => q.isPending) ||
-    productQueries.some((q) => q.isPending) ||
-    storeQueries.some((q) => q.isPending);
+  isCartPending ||
+  variationQueries.some((q) => q.isPending) ||
+  productQueries.some((q) => q.isLoading) ||   
+  storeQueries.some((q) => q.isLoading);      
 
   const error =
     cartError ??

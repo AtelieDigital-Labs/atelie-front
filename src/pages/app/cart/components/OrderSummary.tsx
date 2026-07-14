@@ -6,6 +6,7 @@ type OrderSummaryProps = {
   onContinue: () => void
   onAddProducts?: () => void
   continueLabel?: string
+  loading?: boolean
 }
 
 export function OrderSummary({
@@ -14,6 +15,7 @@ export function OrderSummary({
   onContinue,
   onAddProducts,
   continueLabel = 'Continuar',
+  loading = false,
 }: OrderSummaryProps) {
   const total = subtotal + (shipping ?? 0)
 
@@ -49,8 +51,13 @@ export function OrderSummary({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Button fullWidth size="md" variant="success" onClick={onContinue}>
-          {continueLabel}
+        <Button 
+          fullWidth size="md" 
+          variant="success" 
+          onClick={onContinue}
+          disabled={loading}
+          >
+          {loading ? 'Processando...' : continueLabel}
         </Button>
         {onAddProducts && (
           <Button fullWidth size="md" variant="primary" onClick={onAddProducts}>
