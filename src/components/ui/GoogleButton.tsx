@@ -16,8 +16,7 @@ export function ButtonGoogle() {
           code,
         });
 
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
+        localStorage.setItem("temp_access_token", data.access);
 
         navigate("/");
       } catch (err) {

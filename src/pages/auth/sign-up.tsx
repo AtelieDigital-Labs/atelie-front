@@ -36,14 +36,8 @@ export function SignUp() {
 
     try {
       const response = await registerMutation.mutateAsync(payload);
-
-      const token = response.data?.access || response.data?.token || response.access; 
-    
-      if (token) {
-        localStorage.setItem("temp_access_token", token);
-      } 
       
-      navigate("/");
+      navigate("/auth/sign-in/");
     } catch (error: any) {
       // tratar erros da API aqui
     }
@@ -169,7 +163,7 @@ export function SignUp() {
 
           <p className="text-center text-sm text-text/60">
             Já tem conta?{' '}
-            <Link to="/sign-in" className="text-primary font-semibold hover:underline">
+            <Link to="/auth/sign-in" className="text-primary font-semibold hover:underline">
               Entrar
             </Link>
           </p>

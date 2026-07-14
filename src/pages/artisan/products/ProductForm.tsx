@@ -480,10 +480,10 @@ export function ProductForm({ mode }: ProductFormProps) {
         </button>
 
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="danger" onClick={() => navigate('/artisan/products')}>
+          <Button type="button" variant="danger" onClick={() => navigate(-1)}>
             Cancelar
           </Button>
-          <Button type="submit" variant="success" disabled={isSubmitting}>
+          <Button type="submit" variant="success" disabled={isSubmitting} onClick={() => navigate("/artisan/products/")}>
             {isSubmitting
               ? mode === 'create'
                 ? 'Cadastrando...'
