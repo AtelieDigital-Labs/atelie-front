@@ -4,7 +4,7 @@ import {
   getOrder,
   createOrder,
   retryOrderPayment,
-} from "../../api/orders/orders";
+} from "../../api/orders/userOrders";
 import type { OrderCheckoutRequest, OrderPaymentRequest } from "../../schemas/order";
 
 export function useOrders(page = 1, size = 10) {

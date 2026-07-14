@@ -145,3 +145,16 @@ export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   DELIVERED: [],
   CANCELLED: [],
 }
+
+// item do GET /stores/orders/ 
+export const orderArtisanListItemSchema = z.object({
+  order_id: z.number(),
+  status: orderStatusSchema,
+  price: z.coerce.number(),
+  created_at: z.coerce.date(),
+})
+
+export type OrderArtisanListItem = z.infer<typeof orderArtisanListItemSchema>
+
+export const orderArtisanPageSchema = pageSchema(orderArtisanListItemSchema)
+export type OrderArtisanPage = z.infer<typeof orderArtisanPageSchema>
