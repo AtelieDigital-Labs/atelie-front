@@ -44,7 +44,7 @@ export function Favorites() {
             <ProductCard
               key={product.id}
               product={product}
-              onRemoveFavorite={() => handleRemove(product.id)}
+              // onRemoveFavorite={() => handleRemove(product.id)}
             />
           ))}
         </div>

@@ -3,6 +3,7 @@ import { OrderStatusTabs, type OrderTabKey } from '../components/OrderStatusTabs
 import { OrderCard } from '../components/OrderCard'
 import { Pagination } from '../../../../components/ui/Pagination'
 import { ordersPageSchema, type OrderResponseType } from '../../../../schemas/order'
+import { useGetMeOrders } from '../../../../hooks/orders/useOrders'
 
 // MOCK 
 const MOCK_ORDERS: OrderResponseType[] = [
@@ -34,49 +35,48 @@ async function mockFetchOrders(page: number, status: string | null) {
 
 export function OrdersListPage() {
   const [activeTab, setActiveTab] = useState<OrderTabKey>('ALL')
-  const [orders, setOrders] = useState<OrderResponseType[] | null>(null)
-  const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
+  // const [totalPages, setTotalPages] = useState(1)
+  // const [totalItems, setTotalItems] = useState(0)
+  const {data:orders} = useGetMeOrders()
+  console.log(orders)
+  // useEffect(() => {
+  //   async function fetchOrders() {
+  //     setLoading(true)
+  //     try {
+  //       const status = activeTab === 'ALL' ? null : activeTab
 
-  useEffect(() => {
-    async function fetchOrders() {
-      setLoading(true)
-      try {
-        const status = activeTab === 'ALL' ? null : activeTab
+  //       //trocar pela chamada real e remover mockFetchOrders:
+  //       // const { data } = await api.get('/orders/', {
+  //       //   params: { page: currentPage, ...(status ? { status } : {}) },
+  //       // })
+  //       const { data } = await mockFetchOrders(currentPage, status) // MOCK
 
-        //trocar pela chamada real e remover mockFetchOrders:
-        // const { data } = await api.get('/orders/', {
-        //   params: { page: currentPage, ...(status ? { status } : {}) },
-        // })
-        const { data } = await mockFetchOrders(currentPage, status) // MOCK
-
-        const parsed = ordersPageSchema.parse(data)
-        setOrders(parsed.items)
-        setTotalPages(parsed.pages)
-        setTotalItems(parsed.total)
-      } catch (error) {
-        console.error('Erro ao buscar pedidos:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchOrders()
-  }, [currentPage, activeTab])
+  //       const parsed = ordersPageSchema.parse(data)
+  //       setOrders(parsed.items)
+  //       setTotalPages(parsed.pages)
+  //       setTotalItems(parsed.total)
+  //     } catch (error) {
+  //       console.error('Erro ao buscar pedidos:', error)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+  //   fetchOrders()
+  // }, [currentPage, activeTab])
 
   function handleTabChange(tab: OrderTabKey) {
     setActiveTab(tab)
     setCurrentPage(1)
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-sm text-text/50">Carregando pedidos...</p>
-      </div>
-    )
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-64">
+  //       <p className="text-sm text-text/50">Carregando pedidos...</p>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="mx-auto flex flex-col gap-4 items-center">
@@ -85,7 +85,8 @@ export function OrdersListPage() {
         
         <div className="w-full flex justify-end">
           <p className="text-md font-semibold text-text whitespace-nowrap">
-            {totalItems} {totalItems === 1 ? 'Pedido' : 'Pedidos'}
+            {/* {totalItems} {totalItems === 1 ? 'Pedido' : 'Pedidos'} */}
+            {orders?.length}
           </p>
         </div>
       </div>
@@ -96,17 +97,17 @@ export function OrdersListPage() {
         </div>
       ) : (
         <div className="w-full max-w-3xl flex flex-col gap-2 mb-8">
-          {orders.map((order) => (
+          {orders?.map((order) => (
             <OrderCard key={order.order_id} order={order} />
           ))}
         </div>
       )}
 
-      <Pagination
+      {/* <Pagination
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalPages={10} 
         onPageChange={setCurrentPage}
-      />
+      /> */}
     </div>
   )
 }

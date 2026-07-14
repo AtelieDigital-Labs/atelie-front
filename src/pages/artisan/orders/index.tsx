@@ -1,98 +1,72 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Search, Loader2 } from 'lucide-react'
 import { Table } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { DashboardTabs } from '../components/DashboardTabs'
+import { useGetStoreOrders } from '../../../hooks/orders/useOrders'
+import { type OrderArtisanSummary, type OrderStatus } from '../../../schemas/order'
 
-type Order = {
-  id: string
-  date: string
-  customer: string
-  email: string
-  status: 'PENDENTE' | 'APROVADO' | 'CANCELADO'
-  shipping: 'AGUARDANDO' | 'ENVIADO' | 'ENTREGUE'
-  total: number
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING: 'Pendente',
+  PAID: 'Pago',
+  PROCESSING: 'Processando',
+  SHIPPED: 'Enviado',
+  DELIVERED: 'Entregue',
+  EXPIRED: 'Expirado',
+  REFUSED: 'Recusado',
+  CANCELLED: 'Cancelado',
 }
 
-const MOCK_ORDERS: Order[] = [
-  {
-    id: '#rp8szw0jok',
-    date: '28 Jan, 2026',
-    customer: 'alessandra',
-    email: 'alessandra@gmail.com',
-    status: 'PENDENTE',
-    shipping: 'AGUARDANDO',
-    total: 112.00,
-  },
-]
-
-const STATUS_STYLES = {
-  PENDENTE:  'bg-warning/10 text-warning',
-  APROVADO:  'bg-success/10 text-success',
-  CANCELADO: 'bg-danger/10 text-danger',
-}
-
-const SHIPPING_STYLES = {
-  AGUARDANDO: 'bg-warning/10 text-warning',
-  ENVIADO:    'bg-secondary/10 text-secondary',
-  ENTREGUE:   'bg-success/10 text-success',
+const STATUS_STYLES: Record<OrderStatus, string> = {
+  PENDING:    'bg-warning/10 text-warning',
+  PAID:       'bg-success/10 text-success',
+  PROCESSING: 'bg-info/10 text-info',
+  SHIPPED:    'bg-secondary/10 text-secondary',
+  DELIVERED:  'bg-success/10 text-success',
+  EXPIRED:    'bg-danger/10 text-danger',
+  REFUSED:    'bg-danger/10 text-danger',
+  CANCELLED:  'bg-danger/10 text-danger',
 }
 
 const COLUMNS = (navigate: ReturnType<typeof useNavigate>) => [
   {
     key: 'order',
     label: 'Pedido',
-    render: (row: Order) => (
+    render: (row: OrderArtisanSummary) => (
       <div>
-        <p className="font-semibold text-primary">{row.id}</p>
-        <p className="text-xs text-text/50">{row.date}</p>
-      </div>
-    ),
-  },
-  {
-    key: 'customer',
-    label: 'Cliente',
-    render: (row: Order) => (
-      <div>
-        <p className="font-medium">{row.customer}</p>
-        <p className="text-xs text-text/50">{row.email}</p>
+        <p className="font-semibold text-primary">#{row.order_id}</p>
+        <p className="text-xs text-text/50">
+          {new Date(row.created_at).toLocaleDateString('pt-BR')}{' '}
+          {new Date(row.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+        </p>
       </div>
     ),
   },
   {
     key: 'status',
     label: 'Status',
-    render: (row: Order) => (
+    render: (row: OrderArtisanSummary) => (
       <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_STYLES[row.status]}`}>
-        {row.status}
-      </span>
-    ),
-  },
-  {
-    key: 'shipping',
-    label: 'Envio',
-    render: (row: Order) => (
-      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${SHIPPING_STYLES[row.shipping]}`}>
-        {row.shipping}
+        {STATUS_LABELS[row.status]}
       </span>
     ),
   },
   {
     key: 'total',
-    label: 'Total',
-    render: (row: Order) => (
-      <span className="font-semibold">
-        R$ {row.total.toFixed(2).replace('.', ',')}
+    label: 'Valor do Pedido',
+    render: (row: OrderArtisanSummary) => (
+      <span className="font-semibold text-text">
+        R$ {row.price.toFixed(2).replace('.', ',')}
       </span>
     ),
   },
   {
     key: 'actions',
     label: 'Ações',
-    render: (row: Order) => (
+    render: (row: OrderArtisanSummary) => (
       <button
-        onClick={() => navigate(`/artisan/orders/${row.id.replace('#', '')}`)}
+        onClick={() => navigate(`/artisan/orders/${row.order_id}`)}
         aria-label="Ver detalhes"
         className="text-text/40 hover:text-primary transition-colors cursor-pointer"
       >
@@ -102,25 +76,50 @@ const COLUMNS = (navigate: ReturnType<typeof useNavigate>) => [
   },
 ]
 
-const ITEMS_PER_PAGE = 10
-
 export function ArtisanOrders() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
-  const totalPages = Math.ceil(MOCK_ORDERS.length / ITEMS_PER_PAGE)
-  const paginated = MOCK_ORDERS.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  
+  // Passamos o estado da página atual diretamente para o nosso hook reativo
+  const { data, isPending, error } = useGetStoreOrders(page)
+  
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="animate-spin text-primary" size={32} />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16 text-danger font-medium">
+        Não foi possível carregar os pedidos da loja.
+      </div>
+    )
+  }
+
+  // Extração segura baseada na resposta envelopada do seu backend
+  const orders = data?.items ?? []
+  const totalPages = data?.pages ?? 1
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full">
       <DashboardTabs />
 
       <Table
         columns={COLUMNS(navigate)}
-        data={paginated}
-        emptyMessage="Nenhum pedido encontrado"
+        data={orders} // Passando a lista direta vinda do servidor
+        emptyMessage="Nenhum pedido encontrado para a sua loja."
       />
 
-      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+      {totalPages > 1 && (
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
+      )}
     </div>
   )
 }

@@ -145,16 +145,19 @@ export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   DELIVERED: [],
   CANCELLED: [],
 }
-
-// item do GET /stores/orders/ 
-export const orderArtisanListItemSchema = z.object({
+export const orderArtisanSummarySchema = z.object({
   order_id: z.number(),
   status: orderStatusSchema,
   price: z.coerce.number(),
   created_at: z.coerce.date(),
 })
 
-export type OrderArtisanListItem = z.infer<typeof orderArtisanListItemSchema>
+export type OrderArtisanListItem = z.infer<typeof orderArtisanSummarySchema>
 
-export const orderArtisanPageSchema = pageSchema(orderArtisanListItemSchema)
+export const orderArtisanPageSchema = pageSchema(orderArtisanSummarySchema)
 export type OrderArtisanPage = z.infer<typeof orderArtisanPageSchema>
+export type OrderArtisanSummary = z.infer<typeof orderArtisanSummarySchema>
+
+// Envelopa o resumo no schema de paginação genérico que você já possui
+export const artisanOrdersPageSchema = pageSchema(orderArtisanSummarySchema)
+export type ArtisanOrdersPage = z.infer<typeof artisanOrdersPageSchema>

@@ -1,6 +1,6 @@
 // hooks/catalog/useProducts.ts
-import { useQuery } from "@tanstack/react-query";
-import { listProducts, getProduct, listProductsFavorites } from "../../api/catalogs/products";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { listProducts, getProduct, listProductsFavorites, listProductsSearch, updateProduct, createProduct } from "../../api/catalogs/products";
 
 
 export function useProducts() {
@@ -10,12 +10,51 @@ export function useProducts() {
   });
 }
 
-export function useProduct(productId: number) {
+export function useProductsSearch(
+  q?: string,
+  categoryId?: number
+) {
   return useQuery({
-    queryKey: ["product", productId],
-    queryFn: () => getProduct(productId),
-    enabled: !!productId,
+    queryKey: ["products-search", q, categoryId],
+    queryFn: () => listProductsSearch(q, categoryId),
+    staleTime: 60 * 1000,
   });
+}
+
+export function useProduct(id?: number) {
+  return useQuery({
+    queryKey: ['product', id],
+    queryFn: () => getProduct(id!),
+    enabled: !!id && !isNaN(id),
+  })
+}
+
+/**
+ * Mutation para cadastro de produto.
+ */
+export function useCreateProduct() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+  })
+}
+
+/**
+ * Mutation para edição de produto.
+ */
+export function useUpdateProduct() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: number; formData: FormData }) =>
+      updateProduct(id, formData),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['product', id] })
+    },
+  })
 }
 
 export function useProductsFavorites(ids: number[]) {

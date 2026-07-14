@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Pencil, Trash2 } from 'lucide-react'
+
 import { Table } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { Button } from '../../../components/ui/Button'
@@ -9,164 +10,167 @@ import { ConfirmModal } from '../../../components/ui/ConfirmModal'
 import { useGetMeStoreProducts } from '../../../hooks/catalogs/useStores'
 import type { Product } from '../../../schemas/product'
 
-
-type ArtisanProduct = {
-  id: number
-  name: string
-  price: number
-  stock: number
-  is_active: boolean
-  image?: string
-}
-
-// const MOCK_PRODUCTS: ArtisanProduct[] = [
-//   { id: 1, name: 'Laço Borboleta', price: 28.00, stock: 0, is_active: true },
-//   { id: 2, name: 'Laço Infantil Clássico Princesa', price: 30.00, stock: 0, is_active: true },
-//   { id: 3, name: 'Laço Crinol', price: 30.00, stock: 0, is_active: true },
-//   { id: 4, name: 'Laço parzinho cinderela', price: 38.00, stock: 0, is_active: true },
-//   { id: 5, name: 'Laço Infantil Brilho Suave Encantado', price: 30.00, stock: 10, is_active: true },
-// ]
-
-
-
 const ITEMS_PER_PAGE = 4
 
 export function ArtisanProducts() {
-  const [page, setPage] = useState(1)
   const navigate = useNavigate()
-  const {data: products = [], isPending, error} = useGetMeStoreProducts({
-    enabled: true
-    });
-    if (isPending) {
-  return <div>Carregando...</div>
-}
-if (error) {
-  return <div>erro...</div>
-}
-  // Estados para o modal 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [productToDelete, setProductToDelete] = useState<ArtisanProduct | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  console.log(products)
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE)
+  const [page, setPage] = useState(1)
 
-  const paginated = products.slice(
+  // Estados para o modal de exclusão
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Chamada da API usando React Query
+  const { data: products = [], isPending, error } = useGetMeStoreProducts({
+    enabled: true,
+  })
+
+  // Regra do React: Retornos de renderização condicional devem vir APÓS todos os hooks declarados
+  if (isPending) {
+    return (
+      <div className="flex h-48 items-center justify-center font-medium">
+        Carregando produtos...
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-48 items-center justify-center font-medium text-danger">
+        Ocorreu um erro ao carregar os produtos.
+      </div>
+    )
+  }
+
+  // Cálculos de Paginação
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE)
+  const paginatedProducts = products.slice(
     (page - 1) * ITEMS_PER_PAGE,
     page * ITEMS_PER_PAGE,
   )
 
-
-   // Abre o modal com o produto selecionado
-  function handleOpenDeleteModal(product: ArtisanProduct) {
+  // Handlers do Modal
+  function handleOpenDeleteModal(product: Product) {
     setProductToDelete(product)
     setIsDeleteModalOpen(true)
   }
 
-  // Fecha o modal
   function handleCloseDeleteModal() {
     setIsDeleteModalOpen(false)
     setProductToDelete(null)
   }
 
-  // Confirma a exclusão
   async function handleConfirmDelete() {
     if (!productToDelete) return
 
     setIsDeleting(true)
     try {
-      // TODO: Quando integrar com API
-      // await api.delete(`/products/${productToDelete.id}`)
-
-      // Simula delay da API
-      await new Promise(resolve => setTimeout(resolve, 800))
-
+      // Simulação de chamada de API
+      await new Promise((resolve) => setTimeout(resolve, 800))
       console.log('Produto excluído:', productToDelete.id)
 
-      // Fecha o modal
       handleCloseDeleteModal()
-
       // TODO: toast.success('Produto excluído com sucesso!')
     } catch (error) {
       console.error('Erro ao excluir produto:', error)
-      // TODO: toast.error('Erro ao excluir produto. Tente novamente.')
+      // TODO: toast.error('Erro ao excluir produto.')
     } finally {
       setIsDeleting(false)
     }
   }
 
+  // Configuração das Colunas da Tabela (Tipagem unificada em 'Product')
   const COLUMNS = [
-  {
-    key: 'name',
-    label: 'Nome do Produto',
-    render: (row: Product) => (
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-surface shrink-0 overflow-hidden">
-          {row.variations[0].images[0]
-            ? <img src={row.variations[0].images[0].url} alt={row.name} className="w-full h-full object-cover" />
-            : <div className="w-full h-full bg-primary/10" />
-          }
-        </div>
-        <span className="font-medium">{row.name}</span>
-      </div>
-    ),
-  },
-  {
-    key: 'price',
-    label: 'Preço',
-    render: (row: Product) => (
-      <span className="text-primary font-semibold">
-        {row.variations[0].price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-      </span>
-    ),
-  },
-  {
-    key: 'stock',
-    label: 'Estoque',
-    render: (row: Product) => (
-      <span className={row.variations[0].stock === 0 ? 'text-text/40' : 'text-text'}>
-        {row.variations[0].stock === 0 ? 'None unid.' : `${row.variations[0].stock} unid.`}
-      </span>
-    ),
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    render: (row: ArtisanProduct) => (
-      <span className={`
-        text-xs font-semibold px-3 py-1 rounded-full
-        ${row.is_active
-          ? 'bg-success/10 text-success'
-          : 'bg-danger/10 text-danger'
-        }
-      `}>
-        {row.is_active ? 'ATIVO' : 'INATIVO'}
-      </span>
-    ),
-  },
-  {
-    key: 'actions',
-    label: 'Ações',
-    render: (row: ArtisanProduct) => (
-      <div className="flex items-center gap-3">
-        <Link to={`/artisan/products/edit/${row.id}`}>
-          <button aria-label="Editar" className="text-warning hover:text-warning/70 transition-colors cursor-pointer">
-            <Pencil size={16} />
-          </button>
-        </Link>
-
-        
-        
-        <button 
-          aria-label="Excluir" 
-          className="text-danger hover:text-danger-dark transition-colors justify-end cursor-pointer"
-          onClick={() => handleOpenDeleteModal(row)}
+    {
+      key: 'name',
+      label: 'Nome do Produto',
+      render: (row: Product) => {
+        const firstImage = row.variations?.[0]?.images?.[0]?.url
+        return (
+          <div className="flex items-center gap-3">
+            <div className="bg-surface h-10 w-10 shrink-0 overflow-hidden rounded-xl">
+              {firstImage ? (
+                <img
+                  src={firstImage}
+                  alt={row.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="bg-primary/10 h-full w-full" />
+              )}
+            </div>
+            <span className="font-medium">{row.name}</span>
+          </div>
+        )
+      },
+    },
+    {
+      key: 'price',
+      label: 'Preço',
+      render: (row: Product) => {
+        const price = row.variations?.[0]?.price ?? 0
+        return (
+          <span className="text-primary font-semibold">
+            {price.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            })}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'stock',
+      label: 'Estoque',
+      render: (row: Product) => {
+        const stock = row.variations?.[0]?.stock ?? 0
+        return (
+          <span className={stock === 0 ? 'text-text/40' : 'text-text'}>
+            {stock === 0 ? 'Esgotado' : `${stock} unid.`}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (row: Product) => (
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            row.is_active
+              ? 'bg-success/10 text-success'
+              : 'bg-danger/10 text-danger'
+          }`}
         >
-          <Trash2 size={16} />
-        </button>
-      
-      </div>
-    ),
-  },
+          {row.is_active ? 'ATIVO' : 'INATIVO'}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Ações',
+      render: (row: Product) => (
+        <div className="flex items-center gap-3">
+          <Link to={`/artisan/products/edit/${row.id}`}>
+            <button
+              aria-label="Editar"
+              className="text-warning hover:text-warning/70 cursor-pointer transition-colors"
+            >
+              <Pencil size={16} />
+            </button>
+          </Link>
+
+          <button
+            aria-label="Excluir"
+            className="text-danger hover:text-danger-dark cursor-pointer transition-colors"
+            onClick={() => handleOpenDeleteModal(row)}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ),
+    },
   ]
 
   return (
@@ -175,33 +179,42 @@ if (error) {
 
       <Table
         columns={COLUMNS}
-        data={paginated}
+        data={paginatedProducts}
         emptyMessage="Nenhum produto cadastrado"
       />
 
       <div className="flex items-center justify-end">
-        <Button size="md" variant="success" onClick={()=> navigate('/artisan/products/new')}>
+        {/* Mantém a paginação e o botão alinhados nas extremidades */}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+        <Button
+          className='flex items-center justify-end!'
+          size="md"
+          variant="success"
+          onClick={() => navigate('/artisan/products/new')}
+        >
           Adicionar Produto
         </Button>
       </div>
-        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage}  />
 
-      {/* Modal de confirmação de exclusão */}
-        <ConfirmModal
-          isOpen={isDeleteModalOpen}
-          onClose={handleCloseDeleteModal}
-          onConfirm={handleConfirmDelete}
-          title="Excluir produto"
-          message={
-            productToDelete
-              ? `Tem certeza que deseja excluir "${productToDelete.name}"? Esta ação não pode ser desfeita.`
-              : 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
-          }
-          confirmText="Excluir"
-          cancelText="Cancelar"
-          variant="danger"
-          isConfirming={isDeleting}
-        />
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Excluir produto"
+        message={
+          productToDelete
+            ? `Tem certeza que deseja excluir "${productToDelete.name}"? Esta ação não pode ser desfeita.`
+            : 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
+        }
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+        isConfirming={isDeleting}
+      />
     </div>
   )
 }

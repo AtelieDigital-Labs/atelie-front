@@ -32,3 +32,11 @@ export async function getCurrentUser(): Promise<User> {
 
   return response.data;
 }
+
+export async function logoutUser(): Promise<null> {
+  const response = await api.post(
+    "/api/v1/accounts/logout/",
+  );
+
+  return null;
+}

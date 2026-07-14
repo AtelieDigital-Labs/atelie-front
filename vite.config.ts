@@ -17,8 +17,12 @@ export default defineConfig({
       "/api/v1/accounts": {
         target: "http://localhost:8001",
         changeOrigin: true,
+      },  
+      "/api/v1/ia": {
+        target: "http://localhost:8002",
+        changeOrigin: true,
       },
-      "/api/orders": {
+      "/api/v1": {
         target: "http://localhost:8000",
         changeOrigin: true,
       },

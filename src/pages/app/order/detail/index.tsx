@@ -1,37 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
 import { Check, Store, RefreshCw, Clock, X, Package } from 'lucide-react'
 import { Button } from '../../../../components/ui/Button'
-import { orderReadSchema, orderCreatedSchema, type OrderRead } from '../../../../schemas/order'
-import {OrderStatusBadge} from '../../../../components/ui/OrderStatusBadge'
-import {type OrderStatus} from  '../../../../schemas/order'
-
-
-
-const MOCK_ORDER: OrderRead = {
-  order_id: 2,
-  status: 'PENDING', //  muda o header de acordo com esse status
-  price: 38.0,
-  shipping_cost: 0,
-  shipping_method: 'Econômico',
-  tracking_code: null,
-  payment_method: 'pix',
-  store_id: 'VL Princesa Estilosa',
-  checkout_group_id: 'mock-group-id',
-  created_at: new Date('2026-01-28'),
-  shipping_address: {
-    street: 'Rua das Araucarias',
-    number: 355,
-    complement: null,
-    neighborhood: 'Centro',
-    city: 'Pau dos Ferros',
-    state: 'RN',
-    zip_code: '59900000',
-  },
-  items: [
-    { item_id: 1, product_variant_id: 'Laço parzinho cinderela', quantity: 1, unit_price: 38.0 },
-  ],
-}
+import { OrderStatusBadge } from '../../../../components/ui/OrderStatusBadge'
+import { type OrderStatus } from '../../../../schemas/order'
+import { useOrder, useRetryPayment } from '../../../../hooks/orders/useOrders' // Ajuste o caminho para o seu hook
 
 const HEADER_CONTENT: Record<OrderStatus, { icon: typeof Check; iconBg: string; iconColor: string; title: string }> = {
   PENDING: { icon: Clock, iconBg: 'bg-warning/10', iconColor: 'text-warning', title: 'Aguardando Pagamento' },
@@ -44,83 +16,38 @@ const HEADER_CONTENT: Record<OrderStatus, { icon: typeof Check; iconBg: string; 
   CANCELLED: { icon: X, iconBg: 'bg-danger/10', iconColor: 'text-danger', title: 'Pedido Cancelado' },
 }
 
-async function mockFetchOrder(orderId: number) {
-  return { data: MOCK_ORDER }
-}
-
-async function mockRetryPayment(checkoutGroupId: string) {
-  return {
-    data: {
-      message: 'Pagamento gerado',
-      checkout_group_id: checkoutGroupId,
-      order_ids: [2],
-      payment_info: {
-        id: 'mp-payment-456',
-        qr_code_base64: '',
-        qr_code: '00020126580014br.gov.bcb.pix0136a1b2c3-teste-fake6304ABCD',
-      },
-    },
-  }
-}
-
-
 export function OrderDetailPage() {
   const { orderId } = useParams()
   const navigate = useNavigate()
-  const [order, setOrder] = useState<OrderRead | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [generatingPix, setGeneratingPix] = useState(false)
 
-  useEffect(() => {
-    async function fetchOrder() {
-      if (!orderId) return
-      try {
-        // trocar pela chamada real e remover mockFetchOrder:
-        // const { data } = await api.get(`/orders/${orderId}`)
-        const { data } = await mockFetchOrder(Number(orderId)) // MOCK
-        setOrder(orderReadSchema.parse(data))
-      } catch (error) {
-        console.error('Erro ao buscar pedido:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchOrder()
-  }, [orderId])
+  // Queries e Mutations do TanStack Query
+  const { data: order, isLoading: loading, isError } = useOrder(orderId ? Number(orderId) : undefined)
+  const { mutate: triggerRetryPayment, isPending: generatingPix } = useRetryPayment()
 
-  async function handleGerarPix() {
+  function handleGerarPix() {
     if (!order) return
-    setGeneratingPix(true)
 
-    try {
-      // trocar pela chamada real e remover mockRetryPayment:
-      // const response = await api.post('/orders/payments/retry', {
-      //   checkout_group_id: order.checkout_group_id,
-      // })
-      const response = await mockRetryPayment(order.checkout_group_id) // MOCK
-
-      const data = orderCreatedSchema.parse(response.data)
-
-      navigate('/checkout/payment', {
-        state: {
-          payment_info: data.payment_info,
-          order_ids: data.order_ids,
-          checkout_group_id: data.checkout_group_id,
-        },
-      })
-    } catch (error: any) {
-      // se o retry falhar (mesmo erro 502 do MP), volta pra tela de erro genérica
-      navigate('/checkout/payment-error', {
-        state: {
-          message: error?.response?.data?.detail ?? 'Erro ao gerar o pagamento.',
-        },
-      })
-    } finally {
-      setGeneratingPix(false)
-    }
+    triggerRetryPayment(order.checkout_group_id, {
+      onSuccess: (data) => {
+        navigate('/checkout/payment', {
+          state: {
+            payment_info: data.payment_info,
+            order_ids: data.order_ids,
+            checkout_group_id: data.checkout_group_id,
+          },
+        })
+      },
+      onError: (error: any) => {
+        navigate('/checkout/payment-error', {
+          state: {
+            message: error?.response?.data?.detail ?? 'Erro ao gerar o pagamento.',
+          },
+        })
+      },
+    })
   }
 
-  if (loading || !order) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <p className="text-sm text-text/50">Carregando pedido...</p>
@@ -128,8 +55,19 @@ export function OrderDetailPage() {
     )
   }
 
- 
-  const total = order.price + order.shipping_cost
+  if (isError || !order) {
+    return (
+      <div className="flex flex-col justify-center items-center h-64 gap-4">
+        <p className="text-sm text-danger font-medium">Erro ao carregar os detalhes do pedido.</p>
+        <Button variant="secondary" onClick={() => navigate('/orders/list')}>
+          Voltar para meus pedidos
+        </Button>
+      </div>
+    )
+  }
+
+  // const total = Number(order.price) + Number(order.shipping_cost)
+  const total = Number(order.price)
 
   return (
     <div className="max-w-2xl mx-auto bg-card rounded-2xl p-6 flex flex-col gap-6">
@@ -146,7 +84,7 @@ export function OrderDetailPage() {
             </div>
             <h2 className="text-lg font-bold text-text">{header.title}</h2>
             <p className="text-xs text-text/50">
-              {order.created_at.toLocaleDateString('pt-BR', {
+              {new Date(order.created_at).toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
@@ -159,7 +97,6 @@ export function OrderDetailPage() {
         )
       })()}
 
-      
       <div className="border-t border-primary/10 pt-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Store size={16} className="text-primary" />
@@ -167,10 +104,9 @@ export function OrderDetailPage() {
             Vendido por <span className="font-semibold">{order.store_id}</span>
           </p>
         </div>
-           <OrderStatusBadge status={order.status} />
+        <OrderStatusBadge status={order.status} />
       </div>
 
-      
       <div className="flex flex-col gap-3">
         {order.items.map((item) => (
           <div key={item.item_id} className="flex justify-between text-sm gap-3">
@@ -178,12 +114,11 @@ export function OrderDetailPage() {
               <p className="text-text font-medium">{item.product_variant_id}</p>
               <p className="text-xs text-text/50">Qtd: {item.quantity}</p>
             </div>
-            <span className="text-text/70 shrink-0">R$ {item.unit_price.toFixed(2)}</span>
+            <span className="text-text/70 shrink-0">{item.unit_price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
           </div>
         ))}
       </div>
 
-    
       <div className="border-t border-primary/10 pt-6 grid grid-cols-2 gap-4 text-xs">
         <div>
           <p className="text-[10px] text-text/40 uppercase mb-1">Endereço de Entrega</p>
@@ -194,24 +129,27 @@ export function OrderDetailPage() {
         <div>
           <p className="text-[10px] text-text/40 uppercase mb-1">Pagamento</p>
           <p className="text-text/70">Via {order.payment_method.toUpperCase()}</p>
-          <p className="text-text/70">Total: R$ {total.toFixed(2)}</p>
+          <p className="text-text/70">Total: {total.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}</p>
         </div>
       </div>
 
-    
       <div className="border-t border-primary/10 pt-6 flex flex-col gap-1">
         <div className="flex justify-between text-sm text-text/60">
           <span>Subtotal</span>
-          <span>R$ {order.price.toFixed(2)}</span>
+          <span>{order.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
         </div>
         <div className="flex justify-between text-base font-bold text-text">
           <span>Total</span>
-          <span className="text-primary">R$ {total.toFixed(2)}</span>
+          <span className="text-primary">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL',  })}</span>
         </div>
       </div>
 
-     
-      {/*  botão condicional - aparece se PENDING ou EXPIRED */}
+      {/* Botão condicional - aparece se PENDING ou EXPIRED */}
       {(order.status === 'PENDING' || order.status === 'EXPIRED') && (
         <div className="flex flex-col gap-3">
           <div className="bg-warning/10 rounded-xl p-3 flex items-start gap-2 text-left">
@@ -226,31 +164,27 @@ export function OrderDetailPage() {
       
           <div className='flex flex-col gap-3 px-12'>
             <Button
-                  fullWidth
-                  onClick={handleGerarPix}
-                  disabled={generatingPix}
-                  className="cursor-pointer"
-                >
-                  {generatingPix ? 'Gerando PIX...' : 'Gerar PIX'}
+              fullWidth
+              onClick={handleGerarPix}
+              disabled={generatingPix}
+              className="cursor-pointer"
+            >
+              {generatingPix ? 'Gerando PIX...' : 'Gerar PIX'}
             </Button>
           </div>
-         
-          
         </div>
       )}
+
       <div className='flex flex-col gap-3 px-12'>
-
-
-      <Button
-        variant="secondary"
-        fullWidth
-        onClick={() => navigate('/client/orders')}
-        className="cursor-pointer"
-      >
-        Acompanhar Meus Pedidos
-      </Button>
+        <Button
+          variant="secondary"
+          fullWidth
+          onClick={() => navigate('/orders/list')}
+          className="cursor-pointer"
+        >
+          Acompanhar Meus Pedidos
+        </Button>
       </div>
-      
 
     </div>
   )

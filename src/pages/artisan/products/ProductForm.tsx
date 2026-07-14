@@ -1,26 +1,27 @@
-// src/pages/artisan/products/ProductForm.tsx
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useForm, useFieldArray } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Trash2, Upload, X } from 'lucide-react'
+
 import { Input } from '../../../components/ui/Input'
 import { Button } from '../../../components/ui/Button'
-import type { Product } from '../../../schemas/product'
 import { productCreateSchema } from '../../../schemas/product'
-import { api } from '../../../api/client' 
+import { useProduct, useCreateProduct, useUpdateProduct } from '../../../hooks/catalogs/useProducts'
 
 type ProductFormProps = {
   mode: 'create' | 'edit'
 }
 
-type FormErrors = Partial<Record<'name' | 'description' | 'variations', string>>
-
 type VariationImageForm = {
+  id?: number // Preserva o ID do banco de dados na edição
   url: string
   is_primary: boolean
-  file?: File
+  file?: File // Presente apenas em novas imagens carregadas no front
 }
 
 type VariationForm = {
+  id?: number // Preserva o ID do banco de dados na edição
   temp_id: string
   price: number
   weight: number
@@ -32,6 +33,12 @@ type VariationForm = {
   color: string | null
   size: string | null
   images: VariationImageForm[]
+}
+
+type ProductFormValues = {
+  name: string
+  description: string
+  variations: VariationForm[]
 }
 
 const createEmptyVariation = (): VariationForm => ({
@@ -52,51 +59,48 @@ export function ProductForm({ mode }: ProductFormProps) {
   const navigate = useNavigate()
   const { id } = useParams()
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [variations, setVariations] = useState<VariationForm[]>([createEmptyVariation()])
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isLoading, setIsLoading] = useState(mode === 'edit')
+  // Queries e Mutations via TanStack Query
+  const { data: product, isLoading: isLoadingProduct } = useProduct(mode === 'edit' ? Number(id) : undefined)
+  const { mutate: createProductMutate, isPending: isCreating } = useCreateProduct()
+  const { mutate: updateProductMutate, isPending: isUpdating } = useUpdateProduct()
 
-  async function loadProduct(productId: string) {
-    try {
-      setIsLoading(true)
+  const isSubmitting = isCreating || isUpdating
+  const isLoading = mode === 'edit' && isLoadingProduct
 
-      // TODO: trocar pelo endpoint real
-      // const { data } = await api.get<Product>(`/products/${productId}`)
-      // const product = data
+  // Configuração do React Hook Form com Zod
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    getValues,
+    watch,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm<ProductFormValues>({
+    resolver: zodResolver(productCreateSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      variations: [createEmptyVariation()],
+    },
+  })
 
-      const product: Product = {
-        id: Number(productId),
-        name: 'Laço Borboleta',
-        description: 'Laço artesanal feito à mão',
-        store_id: 1,
-        is_active: true,
-        variations: [
-          {
-            id: 1,
-            price: 28.0,
-            weight: 0.1,
-            length: 10,
-            width: 8,
-            height: 2,
-            sku: 'LAC-001',
-            stock: 15,
-            color: 'Rosa',
-            size: 'U',
-            images: [
-              { id: 1, url: 'https://placehold.co/400x400?text=Laco', is_primary: true },
-            ],
-          },
-        ],
-      }
+  // Gerenciamento dinâmico de Variações no RHF
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'variations',
+  })
 
-      setName(product.name)
-      setDescription(product.description)
-
-      setVariations(
-        product.variations.map((v) => ({
+  // Popula o formulário com os dados da API ao editar
+  useEffect(() => {
+    if (mode === 'edit' && product) {
+      reset({
+        name: product.name,
+        description: product.description,
+        variations: product.variations.map((v) => ({
+          id: v.id, // ID original preservado
           temp_id: crypto.randomUUID(),
           price: v.price,
           weight: v.weight,
@@ -108,127 +112,94 @@ export function ProductForm({ mode }: ProductFormProps) {
           color: v.color,
           size: v.size,
           images: v.images.map((img) => ({
+            id: img.id, // ID original preservado
             url: img.url,
             is_primary: img.is_primary,
           })),
         })),
-      )
-    } catch (error) {
-      console.error('Erro ao carregar produto:', error)
-      navigate('/artisan/products')
-    } finally {
-      setIsLoading(false)
+      })
     }
-  }
+  }, [mode, product, reset])
 
-  useEffect(() => {
-    if (mode === 'edit' && id) {
-      loadProduct(id)
-    }
-  }, [mode, id])
-
-  function handleVariationChange(
-    index: number,
-    field: Exclude<keyof VariationForm, 'images' | 'temp_id'>,
-    value: string | number | null,
-  ) {
-    setVariations((prev) =>
-      prev.map((variation, i) =>
-        i === index ? { ...variation, [field]: value } : variation,
-      ),
-    )
-  }
-
-  function addVariation() {
-    setVariations((prev) => [...prev, createEmptyVariation()])
-  }
-
-  function removeVariation(index: number) {
-    setVariations((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  function handleImageUpload(index: number, files: FileList | null) {
+  // Manipulação otimizada de imagens utilizando getValues
+  function handleImageUpload(varIndex: number, files: FileList | null) {
     if (!files || files.length === 0) return
+
+    const currentVariations = getValues('variations')
+    const currentImages = currentVariations[varIndex]?.images || []
 
     const newImages: VariationImageForm[] = Array.from(files).map((file, i) => ({
       url: URL.createObjectURL(file),
       file,
-      is_primary: i === 0,
+      is_primary: currentImages.length === 0 && i === 0,
     }))
 
-    setVariations((prev) =>
-      prev.map((variation, i) =>
-        i === index
-          ? {
-              ...variation,
-              images: [
-                ...variation.images,
-                ...newImages.map((img, imgIndex) => ({
-                  ...img,
-                  is_primary: variation.images.length === 0 ? imgIndex === 0 : img.is_primary,
-                })),
-              ],
-            }
-          : variation,
-      ),
-    )
+    setValue(`variations.${varIndex}.images`, [...currentImages, ...newImages])
   }
 
   function removeImage(varIndex: number, imgIndex: number) {
-    setVariations((prev) =>
-      prev.map((variation, i) =>
-        i === varIndex
-          ? {
-              ...variation,
-              images: variation.images.filter((_, j) => j !== imgIndex),
-            }
-          : variation,
-      ),
-    )
+    const currentVariations = getValues('variations')
+    const currentImages = currentVariations[varIndex]?.images || []
+    const updatedImages = currentImages.filter((_, j) => j !== imgIndex)
+
+    const hasPrimary = updatedImages.some((img) => img.is_primary)
+    if (!hasPrimary && updatedImages.length > 0) {
+      updatedImages[0].is_primary = true
+    }
+
+    setValue(`variations.${varIndex}.images`, updatedImages)
   }
 
   function setPrimaryImage(varIndex: number, imgIndex: number) {
-    setVariations((prev) =>
-      prev.map((variation, i) =>
-        i === varIndex
-          ? {
-              ...variation,
-              images: variation.images.map((img, j) => ({
-                ...img,
-                is_primary: j === imgIndex,
-              })),
-            }
-          : variation,
-      ),
-    )
+    const currentVariations = getValues('variations')
+    const currentImages = currentVariations[varIndex]?.images || []
+    const updatedImages = currentImages.map((img, j) => ({
+      ...img,
+      is_primary: j === imgIndex,
+    }))
+
+    setValue(`variations.${varIndex}.images`, updatedImages)
   }
 
-  function buildPayload() {
-    return {
-      name,
-      description,
-      variations: variations.map((variation) => ({
-        temp_id: variation.temp_id,
-        price: variation.price,
-        weight: variation.weight,
-        length: variation.length,
-        width: variation.width,
-        height: variation.height,
-        sku: variation.sku,
-        stock: variation.stock,
-        color: variation.color,
-        size: variation.size,
+  // Prepara o payload estrutural e anexa mídias novas ao FormData
+  // Prepara o payload estrutural e anexa mídias novas ao FormData
+  function buildFormData(data: ProductFormValues) {
+    const formData = new FormData()
+
+    // 💡 SOLUÇÃO: Buscamos as variações direto do estado interno do Hook Form.
+    // Isso impede que o Zod filtre/remova o 'temp_id' caso ele não esteja no schema.
+    const formVariations = getValues('variations')
+
+    const payload = {
+      name: data.name,
+      description: data.description,
+      variations: formVariations.map((v) => ({
+        id: v.id || null, // Garante que o ID vá para o backend atualizar corretamente
+        temp_id: v.temp_id, // Agora o temp_id está 100% garantido!
+        price: v.price,
+        weight: v.weight,
+        length: v.length,
+        width: v.width,
+        height: v.height,
+        sku: v.sku || null,
+        stock: v.stock,
+        color: v.color || null,
+        size: v.size || null,
+        // Retorna as imagens existentes (sem propriedade 'file') para que o backend não as remova
+        images: v.images
+          .filter((img) => !img.file)
+          .map((img) => ({
+            id: img.id,
+            url: img.url,
+            is_primary: img.is_primary,
+          })),
       })),
     }
-  }
-
-  function buildFormData() {
-    const formData = new FormData()
-    const payload = buildPayload()
 
     formData.append('payload', JSON.stringify(payload))
 
-    variations.forEach((variation) => {
+    // Anexa apenas arquivos novos e associa ao respectivo UUID da variação
+    formVariations.forEach((variation) => {
       variation.images.forEach((image) => {
         if (image.file) {
           formData.append('images', image.file)
@@ -240,49 +211,44 @@ export function ProductForm({ mode }: ProductFormProps) {
     return formData
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setErrors({})
-
-    const payload = buildPayload()
-    const result = productCreateSchema.safeParse(payload)
-
-    if (!result.success) {
-      const flat = result.error.flatten()
-      const fieldErrors: FormErrors = {}
-
-      if (flat.fieldErrors.name?.[0]) fieldErrors.name = flat.fieldErrors.name[0]
-      if (flat.fieldErrors.description?.[0]) fieldErrors.description = flat.fieldErrors.description[0]
-      if (flat.fieldErrors.variations?.[0]) fieldErrors.variations = flat.fieldErrors.variations[0]
-
-      setErrors(fieldErrors)
-      return
+  const onSubmit = (data: ProductFormValues) => {
+    // Validação preventiva no Front-end ao criar
+    if (mode === 'create') {
+      const hasAtLeastOneImage = data.variations.some((v) => v.images.length > 0)
+      if (!hasAtLeastOneImage) {
+        setError('root', {
+          message: 'Você precisa adicionar pelo menos uma imagem ao produto.',
+        })
+        return
+      }
     }
 
-    const formData = buildFormData()
+    const formData = buildFormData(data)
 
-    setIsSubmitting(true)
-    try {
-      if (mode === 'create') {
-        await api.post('api/v1/catalog/products/', formData)
-      } else if (id) {
-        await api.patch(`/products/${id}`, formData)
-      }
-
-      navigate('/artisan/products')
-    } catch (error: any) {
+    const handleApiError = (error: any) => {
       if (error?.response?.status === 400) {
         const apiErrors = error.response.data
-        setErrors({
-          name: apiErrors?.name?.[0],
-          description: apiErrors?.description?.[0],
-          variations: apiErrors?.variations?.[0],
-        })
+        if (apiErrors?.name?.[0]) setError('name', { message: apiErrors.name[0] })
+        if (apiErrors?.description?.[0]) setError('description', { message: apiErrors.description[0] })
+        if (apiErrors?.variations?.[0]) setError('root', { message: apiErrors.variations[0] })
       } else {
-        setErrors({ name: 'Erro ao salvar produto. Tente novamente.' })
+        setError('root', { message: 'Erro ao salvar produto. Tente novamente.' })
       }
-    } finally {
-      setIsSubmitting(false)
+    }
+
+    if (mode === 'create') {
+      createProductMutate(formData, {
+        onSuccess: () => navigate('/artisan/products'),
+        onError: handleApiError,
+      })
+    } else if (id) {
+      updateProductMutate(
+        { id: Number(id), formData },
+        {
+          onSuccess: () => navigate('/artisan/products'),
+          onError: handleApiError,
+        },
+      )
     }
   }
 
@@ -299,7 +265,7 @@ export function ProductForm({ mode }: ProductFormProps) {
 
   return (
     <div className="flex flex-col items-center justify-center gap-6">
-      <form onSubmit={handleSubmit} className="flex w-full max-w-3xl flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-3xl flex-col gap-6">
         <div className="text-center">
           <h2 className="font-title text-3xl font-bold text-primary">
             {mode === 'create' ? 'Cadastro do Produto' : 'Editar Produto'}
@@ -311,22 +277,20 @@ export function ProductForm({ mode }: ProductFormProps) {
           </p>
         </div>
 
+        {/* Informações Gerais do Produto */}
         <div className="bg-card flex flex-col gap-4 rounded-2xl p-6">
           <h3 className="font-title text-lg text-primary">Informações do Produto</h3>
 
           <Input
             label="Nome*"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
             placeholder="Digite o nome do produto"
-            error={errors.name}
+            error={errors.name?.message}
+            {...register('name')}
           />
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-text">Descrição*</label>
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               placeholder="Descreva o produto"
               rows={4}
               className={`
@@ -336,188 +300,179 @@ export function ProductForm({ mode }: ProductFormProps) {
                 focus:border-primary focus:ring-2 focus:ring-primary/20
                 ${errors.description ? 'border-danger' : ''}
               `}
+              {...register('description')}
             />
-            {errors.description && <p className="text-xs text-danger">{errors.description}</p>}
+            {errors.description && <p className="text-xs text-danger">{errors.description.message}</p>}
           </div>
         </div>
 
-        {variations.map((variation, varIndex) => (
-          <div key={variation.temp_id} className="bg-card flex flex-col gap-4 rounded-2xl p-6">
-            <div className="flex items-center justify-between">
-              <h3 className="font-title text-lg text-primary">Variação {varIndex + 1}</h3>
+        {/* Variações Dinâmicas */}
+        {fields.map((field, varIndex) => {
+          // Utiliza o watch local para atualizar a lista de imagens dinamicamente
+          const variationImages = watch(`variations.${varIndex}.images`) || []
 
-              {variations.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeVariation(varIndex)}
-                  className="text-danger transition-colors hover:text-danger-dark"
-                  aria-label="Remover variação"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </div>
+          return (
+            <div key={field.id} className="bg-card flex flex-col gap-4 rounded-2xl p-6">
+              <div className="flex items-center justify-between">
+                <h3 className="font-title text-lg text-primary">Variação {varIndex + 1}</h3>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Cor"
-                value={variation.color ?? ''}
-                onChange={(e) =>
-                  handleVariationChange(varIndex, 'color', e.target.value || null)
-                }
-                placeholder="Rosa Bebê"
-              />
-              <Input
-                label="Tamanho"
-                value={variation.size ?? ''}
-                onChange={(e) =>
-                  handleVariationChange(varIndex, 'size', e.target.value || null)
-                }
-                placeholder="P / M / G / U"
-              />
-            </div>
+                {fields.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => remove(varIndex)}
+                    className="text-danger transition-colors hover:text-danger-dark"
+                    aria-label="Remover variação"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Preço (R$)*"
-                type="number"
-                value={variation.price || ''}
-                onChange={(e) =>
-                  handleVariationChange(varIndex, 'price', Number(e.target.value))
-                }
-                placeholder="0,00"
-                min={0}
-                step={0.01}
-              />
-              <Input
-                label="Estoque*"
-                type="number"
-                value={variation.stock || ''}
-                onChange={(e) =>
-                  handleVariationChange(varIndex, 'stock', Number(e.target.value))
-                }
-                placeholder="0"
-                min={0}
-              />
-            </div>
-
-            <Input
-              label="SKU"
-              value={variation.sku ?? ''}
-              onChange={(e) =>
-                handleVariationChange(varIndex, 'sku', e.target.value || null)
-              }
-              placeholder="LAC-001-ROSA"
-            />
-
-            <div>
-              <p className="mb-2 text-sm font-medium text-text">
-                Dimensões (cm) e Peso (kg)*
-              </p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="Comprimento"
-                  type="number"
-                  value={variation.length || ''}
-                  onChange={(e) =>
-                    handleVariationChange(varIndex, 'length', Number(e.target.value))
-                  }
-                  placeholder="0"
-                  min={0}
-                  step={0.1}
+                  label="Cor"
+                  placeholder="Rosa Bebê"
+                  error={errors.variations?.[varIndex]?.color?.message}
+                  {...register(`variations.${varIndex}.color`)}
                 />
                 <Input
-                  label="Largura"
-                  type="number"
-                  value={variation.width || ''}
-                  onChange={(e) =>
-                    handleVariationChange(varIndex, 'width', Number(e.target.value))
-                  }
-                  placeholder="0"
-                  min={0}
-                  step={0.1}
-                />
-                <Input
-                  label="Altura"
-                  type="number"
-                  value={variation.height || ''}
-                  onChange={(e) =>
-                    handleVariationChange(varIndex, 'height', Number(e.target.value))
-                  }
-                  placeholder="0"
-                  min={0}
-                  step={0.1}
-                />
-                <Input
-                  label="Peso (kg)"
-                  type="number"
-                  value={variation.weight || ''}
-                  onChange={(e) =>
-                    handleVariationChange(varIndex, 'weight', Number(e.target.value))
-                  }
-                  placeholder="0"
-                  min={0}
-                  step={0.01}
+                  label="Tamanho"
+                  placeholder="P / M / G / U"
+                  error={errors.variations?.[varIndex]?.size?.message}
+                  {...register(`variations.${varIndex}.size`)}
                 />
               </div>
-            </div>
 
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-text">Imagens</p>
-
-              {variation.images.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {variation.images.map((img, imgIndex) => (
-                    <div key={`${variation.temp_id}-${imgIndex}`} className="group relative">
-                      <img
-                        src={img.url}
-                        alt=""
-                        className={`
-                          h-20 w-20 cursor-pointer rounded-xl border-2 object-cover transition-colors
-                          ${img.is_primary ? 'border-primary' : 'border-transparent'}
-                        `}
-                        onClick={() => setPrimaryImage(varIndex, imgIndex)}
-                      />
-                      {img.is_primary && (
-                        <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] text-white">
-                          Principal
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(varIndex, imgIndex)}
-                        className="absolute -right-1.5 -top-1.5 rounded-full bg-danger p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/20 p-8 transition-colors hover:border-primary/50">
-                <Upload size={24} className="text-primary/40" />
-                <span className="text-sm text-primary/60">Clique para fazer upload da imagem</span>
-                <span className="text-xs text-text/40">
-                  Formatos suportados: JPG, PNG, WEBP (máx. 5MB)
-                </span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handleImageUpload(varIndex, e.target.files)}
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Preço (R$)*"
+                  type="number"
+                  placeholder="0,00"
+                  min={0}
+                  step={0.01}
+                  error={errors.variations?.[varIndex]?.price?.message}
+                  {...register(`variations.${varIndex}.price`, { valueAsNumber: true })}
                 />
-              </label>
-            </div>
-          </div>
-        ))}
+                <Input
+                  label="Estoque*"
+                  type="number"
+                  placeholder="0"
+                  min={0}
+                  error={errors.variations?.[varIndex]?.stock?.message}
+                  {...register(`variations.${varIndex}.stock`, { valueAsNumber: true })}
+                />
+              </div>
 
-        {errors.variations && <p className="text-xs text-danger">{errors.variations}</p>}
+              <Input
+                label="SKU"
+                placeholder="LAC-001-ROSA"
+                error={errors.variations?.[varIndex]?.sku?.message}
+                {...register(`variations.${varIndex}.sku`)}
+              />
+
+              {/* Dimensões e Peso */}
+              <div>
+                <p className="mb-2 text-sm font-medium text-text">
+                  Dimensões (cm) e Peso (kg)*
+                </p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <Input
+                    label="Comprimento"
+                    type="number"
+                    placeholder="0"
+                    min={0}
+                    step={0.1}
+                    error={errors.variations?.[varIndex]?.length?.message}
+                    {...register(`variations.${varIndex}.length`, { valueAsNumber: true })}
+                  />
+                  <Input
+                    label="Largura"
+                    type="number"
+                    placeholder="0"
+                    min={0}
+                    step={0.1}
+                    error={errors.variations?.[varIndex]?.width?.message}
+                    {...register(`variations.${varIndex}.width`, { valueAsNumber: true })}
+                  />
+                  <Input
+                    label="Altura"
+                    type="number"
+                    placeholder="0"
+                    min={0}
+                    step={0.1}
+                    error={errors.variations?.[varIndex]?.height?.message}
+                    {...register(`variations.${varIndex}.height`, { valueAsNumber: true })}
+                  />
+                  <Input
+                    label="Peso (kg)"
+                    type="number"
+                    placeholder="0"
+                    min={0}
+                    step={0.01}
+                    error={errors.variations?.[varIndex]?.weight?.message}
+                    {...register(`variations.${varIndex}.weight`, { valueAsNumber: true })}
+                  />
+                </div>
+              </div>
+
+              {/* Seção de Upload de Imagens */}
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium text-text">Imagens</p>
+
+                {variationImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {variationImages.map((img, imgIndex) => (
+                      <div key={`${field.id}-img-${imgIndex}`} className="group relative">
+                        <img
+                          src={img.url}
+                          alt=""
+                          className={`
+                            h-20 w-20 cursor-pointer rounded-xl border-2 object-cover transition-colors
+                            ${img.is_primary ? 'border-primary' : 'border-transparent'}
+                          `}
+                          onClick={() => setPrimaryImage(varIndex, imgIndex)}
+                        />
+                        {img.is_primary && (
+                          <span className="absolute bottom-1 left-1 rounded bg-primary px-1 text-[10px] text-white">
+                            Principal
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeImage(varIndex, imgIndex)}
+                          className="absolute -right-1.5 -top-1.5 rounded-full bg-danger p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/20 p-8 transition-colors hover:border-primary/50">
+                  <Upload size={24} className="text-primary/40" />
+                  <span className="text-sm text-primary/60">Clique para fazer upload da imagem</span>
+                  <span className="text-xs text-text/40">
+                    Formatos suportados: JPG, PNG, WEBP (máx. 5MB)
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(varIndex, e.target.files)}
+                  />
+                </label>
+              </div>
+            </div>
+          )
+        })}
+
+        {errors.root && <p className="text-xs text-danger text-center font-semibold">{errors.root.message}</p>}
 
         <button
           type="button"
-          onClick={addVariation}
+          onClick={() => append(createEmptyVariation())}
           className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/20 p-4 text-sm text-primary/60 transition-colors hover:border-primary/50 hover:text-primary"
         >
           <Plus size={16} />

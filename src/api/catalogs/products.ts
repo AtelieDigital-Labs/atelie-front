@@ -6,9 +6,25 @@ export async function listProducts(): Promise<Product[]> {
   return response.data.products;
 }
 
-export async function createProduct() {
-  const response = await api.post("/api/catalog/products");
-  return response.data;
+export async function listProductsSearch(
+  q?: string,
+  categoryId?: number
+): Promise<Product[]> {
+  const response = await api.get<ProductsResponse>(
+    "/api/v1/catalog/products/",
+    {
+      params: {
+        q: q || undefined,
+        category_id: categoryId || undefined,
+      },
+    }
+  );
+
+  return response.data.products;
+}
+
+export async function createProduct(formData: FormData): Promise<void> {
+  await api.post('/api/v1/catalog/products/', formData)
 }
 
 export async function getProduct(productId: number){
@@ -19,9 +35,8 @@ export async function getProduct(productId: number){
   return data;
 }
 
-export async function patchProduct() {
-  const response = await api.patch("/api/catalog/products");
-  return response.data;
+export async function updateProduct(id: number, formData: FormData): Promise<void> {
+  await api.patch(`/api/v1/catalog/products/${id}`, formData)
 }
 
 

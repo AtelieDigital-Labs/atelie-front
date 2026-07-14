@@ -6,11 +6,18 @@ type Column<T> = {
 
 type TableProps<T> = {
   columns: Column<T>[]
-  data: T[]
+  data: T[] | null | undefined // Permitir null/undefined no tipo para evitar erros do TS no pai
   emptyMessage?: string
 }
 
-export function Table<T>({ columns, data, emptyMessage = 'Nenhum item encontrado' }: TableProps<T>) {
+export function Table<T>({ 
+  columns, 
+  data, 
+  emptyMessage = 'Nenhum item encontrado' 
+}: TableProps<T>) {
+  
+  const safeData = Array.isArray(data) ? data : []
+
   return (
     <div className="bg-card rounded-2xl overflow-hidden">
       <table className="w-full">
@@ -27,7 +34,7 @@ export function Table<T>({ columns, data, emptyMessage = 'Nenhum item encontrado
           </tr>
         </thead>
         <tbody>
-          {data.length === 0 ? (
+          {safeData.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
@@ -37,7 +44,7 @@ export function Table<T>({ columns, data, emptyMessage = 'Nenhum item encontrado
               </td>
             </tr>
           ) : (
-            data.map((row, i) => (
+            safeData.map((row, i) => (
               <tr
                 key={i}
                 className="border-b border-primary/5 last:border-0 hover:bg-surface/50 transition-colors"

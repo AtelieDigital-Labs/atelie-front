@@ -7,7 +7,7 @@ import {ArtisianRoutes} from './artisian-routes'
 
 
 export function Router() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, isAuthenticated } = useAuth()
 
   if (isLoading) return <div>Carregando...</div>
 
