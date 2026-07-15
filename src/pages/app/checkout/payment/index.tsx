@@ -25,9 +25,14 @@ export function PaymentPage() {
 
   const primaryOrderId = orderIds?.[0]
 
-  const expiresAtMs = payment?.expires_at ? payment.expires_at.getTime() : 0
+  // const expiresAtMs =  payment?.expires_at
+  //   ? new Date(payment.expires_at).getTime()
+  //   : 0
+
   const [timeLeft, setTimeLeft] = useState<number>(() =>
-    payment?.expires_at ? Math.max(0, Math.floor((expiresAtMs - Date.now()) / 1000)) : 0
+  payment?.expires_at
+    ? Math.max(0, Math.floor((new Date(payment.expires_at).getTime() - Date.now()) / 1000))
+    : 0
   )
 
   // Timer visual de contagem regressiva
