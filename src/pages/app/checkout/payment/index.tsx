@@ -5,7 +5,7 @@ import QRCode from 'qrcode' // irei remover import e dependência (npm uninstall
 import { type PaymentInfo, type OrderStatus } from '../../../../schemas/order'
 
 
-const PIX_EXPIRATION_MINUTES = 30
+const PIX_EXPIRATION_MINUTES = 15
 const POLL_INTERVAL_MS = 5000
 
 const MOCK_PAYMENT_AMOUNT = 86.64
