@@ -27,7 +27,7 @@ export function SalesChart(){
           <p className='text-xs text-text/50 mt-0.5'>Acompanhe o desempenho da sua loja</p>
         </div>
         <button className='flex items-center gap-1.5 text-sm text-text/60 border border-primary/20 rounded-xl px-3 py-1.5 hover:border-primary transition-colors'>
-          Junho 2026
+          Outubro 2026
           <ChevronDown size={14}/>
         </button>
 

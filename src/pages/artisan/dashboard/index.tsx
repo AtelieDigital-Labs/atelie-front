@@ -15,14 +15,14 @@ export function Dashboard() {
   const METRICS = [
     {
       label: 'Produtos Ativos',
-      value: 8,
+      value: 5,
       icon: Package,
       iconBg: 'bg-secondary/10',
       iconColor: 'text-secondary',
     },
     {
       label: 'Pedidos em Andamento',
-      value: 3,
+      value: 0,
       icon: Truck,
       iconBg: 'bg-highlight/10',
       iconColor: 'text-highlight',
