@@ -1,9 +1,15 @@
-import type {  orderReadSchema, orderCreatedSchema, OrderRead, OrderArtisanRead } from "../../schemas/order";
+import type {  orderReadSchema, orderCreatedSchema, OrderRead, OrderArtisanRead, OrderStatus,OrdersPage } from "../../schemas/order";
 import { api } from "../client";
 
-export async function getMeOrders(): Promise<OrderRead[]> {
-  const response = await api.get("/api/v1/orders/");
-  return response.data.items;
+export async function getMeOrders(
+  page = 1,
+  size = 10,
+  status?: OrderStatus
+): Promise<OrdersPage> {
+  const { data } = await api.get<OrdersPage>("/api/v1/orders/", {
+    params: { page, size, status },
+  });
+  return data;
 }
 
 /**

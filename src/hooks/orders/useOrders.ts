@@ -70,10 +70,10 @@ export function useRetryOrderPayment() {
   });
 }
 
-export function useGetMeOrders() {
+export function useGetMeOrders(page = 1, size = 10, status?: OrderStatus) {
   return useQuery({
-    queryKey: ["orders"],
-    queryFn: () => getMeOrders(),
+    queryKey: ["orders", page, size, status],
+    queryFn: () => getMeOrders(page, size, status),
   });
 }
 
