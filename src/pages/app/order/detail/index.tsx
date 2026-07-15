@@ -150,15 +150,12 @@ export function OrderDetailPage() {
       </div>
 
       {/* Botão condicional - aparece se PENDING ou EXPIRED */}
-      {(order.status === 'PENDING' || order.status === 'EXPIRED') && (
+      { order.status === 'PENDING' && (
         <div className="flex flex-col gap-3">
           <div className="bg-warning/10 rounded-xl p-3 flex items-start gap-2 text-left">
             <RefreshCw size={16} className="text-warning shrink-0 mt-0.5" />
             <p className="text-xs text-warning font-medium">
-              {order.status === 'EXPIRED'
-                ? 'O código PIX anterior expirou. Clique em "Gerar PIX" abaixo para criar um novo pagamento.'
-                : 'Este pedido ainda não foi pago. Clique em "Gerar PIX" abaixo para exibir o código de pagamento.'
-              }
+                Este pedido ainda não foi pago. Clique em "Gerar PIX" abaixo para exibir o código de pagamento.
             </p>
           </div>
       
