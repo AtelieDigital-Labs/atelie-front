@@ -1,4 +1,4 @@
-import type {  orderReadSchema, orderCreatedSchema, OrderRead } from "../../schemas/order";
+import type {  orderReadSchema, orderCreatedSchema, OrderRead, OrderArtisanRead } from "../../schemas/order";
 import { api } from "../client";
 
 export async function getMeOrders(): Promise<OrderRead[]> {
@@ -26,7 +26,7 @@ export async function retryPayment(checkoutGroupId: string) {
   return data
 }
 
-export async function getStoreOrders(): Promise<Order[]> {
+export async function getStoreOrders(): Promise<OrderArtisanRead[]> {
   const { data } = await api.get(`/api/v1/stores/orders/`)
   return data.items
 }

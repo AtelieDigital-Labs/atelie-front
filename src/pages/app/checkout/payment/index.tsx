@@ -1,75 +1,36 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Copy, Check } from 'lucide-react'
-import QRCode from 'qrcode' // irei remover import e dependência (npm uninstall qrcode) quando conectar com o back
-import { type PaymentInfo, type OrderStatus } from '../../../../schemas/order'
-
-
-const PIX_EXPIRATION_MINUTES = 15
-const POLL_INTERVAL_MS = 5000
-
-const MOCK_PAYMENT_AMOUNT = 86.64
-
-//MOCK
-const MOCK_PIX_PAYLOAD =
-  '00020126580014br.gov.bcb.pix0136a1b2c3-teste-fake6304ABCD'
-// gera o base64 do QR Code na hora, simulando o que o backend mandaria pronto
-async function generateMockPayment(): Promise<PaymentInfo> {
-  const dataUrl = await QRCode.toDataURL(MOCK_PIX_PAYLOAD)
-  const qr_code_base64 = dataUrl.split(',')[1] // remove o prefixo "data:image/png;base64," 
-
-  return {
-    id: 'mp-payment-123',
-    qr_code_base64,
-    qr_code: MOCK_PIX_PAYLOAD,
-    expires_at: new Date(Date.now() + PIX_EXPIRATION_MINUTES * 60 * 1000),
-  }
-}
-
-
-const MOCK_STATUS: OrderStatus = 'PAID'
-let MOCK_TICKS = 0
-async function fetchMockOrderStatus(): Promise<OrderStatus> {
-  MOCK_TICKS++
-  if (MOCK_TICKS >= 3) return MOCK_STATUS
-  return 'PENDING'
-}
-
+import { type PaymentInfo } from '../../../../schemas/order'
+import { useOrder } from '../../../../hooks/orders/useOrders'
 
 export function PaymentPage() {
   const [copied, setCopied] = useState(false)
   const navigate = useNavigate()
   const { state } = useLocation()
 
-  // TODO: quando integrar, ler direto do state (sem fallback mocado):
-  // const orderIds = state?.order_ids as number[] | undefined
-  // const checkoutGroupId = state?.checkout_group_id as string | undefined
-  const orderIds: number[] = state?.order_ids ?? [1, 2] // mock fixo enquanto não integra
-  const checkoutGroupId = state?.checkout_group_id ?? 'mock-group-id'
+  const orderIds: number[] | undefined = state?.order_ids
+  const checkoutGroupId: string | undefined = state?.checkout_group_id
+  const payment: PaymentInfo | undefined = state?.payment_info
+  // opcional: some se você ainda não adicionou total_amount ao state da ShippingPage (ver nota abaixo)
+  const totalAmount: number | undefined = state?.total_amount
 
-  // usamos só o primeiro order_id do grupo pro polling — o webhook do MP
-  // atualiza todos os pedidos do grupo juntos, então um representa o status do todo
-  const primaryOrderId = orderIds[0]
-
-  const [payment, setPayment] = useState<PaymentInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [timeLeft, setTimeLeft] = useState<number>(0)
-
+  // Página só faz sentido chegando do checkout (state em memória).
+  // Se foi acessada direto / após F5, não tem como montar o QR Code nem fazer polling.
   useEffect(() => {
-    
-    generateMockPayment().then((mock) => {
-      setPayment(mock)
-      setLoading(false)
+    if (!payment || !orderIds?.length) {
+      navigate('/cart', { replace: true })
+    }
+  }, [payment, orderIds, navigate])
 
-      const expiresAtMs = mock.expires_at
-        ? mock.expires_at.getTime()
-        : Date.now() + PIX_EXPIRATION_MINUTES * 60 * 1000
+  const primaryOrderId = orderIds?.[0]
 
-      setTimeLeft(Math.max(0, Math.floor((expiresAtMs - Date.now()) / 1000)))
-    })
-  }, [])
+  const expiresAtMs = payment?.expires_at ? payment.expires_at.getTime() : 0
+  const [timeLeft, setTimeLeft] = useState<number>(() =>
+    payment?.expires_at ? Math.max(0, Math.floor((expiresAtMs - Date.now()) / 1000)) : 0
+  )
 
-  // Timer 
+  // Timer visual de contagem regressiva
   useEffect(() => {
     if (timeLeft <= 0 || !payment) return
 
@@ -86,37 +47,24 @@ export function PaymentPage() {
     return () => clearInterval(interval)
   }, [timeLeft, payment])
 
-  // Polling: verifica o status real do pagamento no backend
+  // Polling real do status do pedido (o hook useOrder já faz refetchInterval
+  // enquanto o status não for PAID/EXPIRED — ver ajuste no useOrders.ts)
+  const { data: order } = useOrder(primaryOrderId)
+
   useEffect(() => {
-    if (!primaryOrderId || !payment) return
+    if (!order) return
 
-    const interval = setInterval(async () => {
-      try {
-        // trocar pela chamada real e remover fetchMockOrderStatus:
-        // const { data } = await api.get(`/orders/${primaryOrderId}`)
-        // const order = orderReadSchema.parse(data)
-        // const status = order.status
-        const status = await fetchMockOrderStatus() // MOCK
+    if (order.status === 'PAID') {
+      navigate(`/checkout/success/${checkoutGroupId}`, {
+        replace: true,
+        state: { order_ids: orderIds },
+      })
+    }
 
-        if (status === 'PAID') {
-          clearInterval(interval)
-          navigate(`/checkout/success/${checkoutGroupId}`, {
-            replace: true,
-            state: { order_ids: orderIds }, // repassa os ids adiante pra tela de sucesso
-          })
-        }
-
-        if (status === 'EXPIRED') {
-          clearInterval(interval)
-          navigate('/checkout/expired', { replace: true })
-        }
-      } catch (error) {
-        console.error('Erro ao verificar status do pagamento:', error)
-      }
-    }, POLL_INTERVAL_MS)
-
-    return () => clearInterval(interval)
-  }, [primaryOrderId, checkoutGroupId, orderIds, payment, navigate])
+    if (order.status === 'EXPIRED') {
+      navigate('/checkout/expired', { replace: true })
+    }
+  }, [order, checkoutGroupId, orderIds, navigate])
 
   async function handleCopy() {
     if (!payment) return
@@ -147,7 +95,9 @@ export function PaymentPage() {
     return 'text-primary'
   }
 
-  if (loading || !payment) {
+  // Enquanto não tem payment_info válido, o useEffect acima já dispara o
+  // redirect — aqui só evita renderizar a tela vazia por um instante.
+  if (!payment) {
     return (
       <div className="flex justify-center items-center h-64">
         <p className="text-sm text-text/50">Carregando pagamento...</p>
@@ -162,11 +112,13 @@ export function PaymentPage() {
 
         <div className="bg-card rounded-2xl p-6 flex flex-col gap-6 w-full max-w-md">
 
-          <div className="text-center">
-            <p className="text-base font-semibold text-text">
-              Total a pagar: <span className="font-bold text-xl">{formatCurrency(MOCK_PAYMENT_AMOUNT)}</span>
-            </p>
-          </div>
+          {totalAmount !== undefined && (
+            <div className="text-center">
+              <p className="text-base font-semibold text-text">
+                Total a pagar: <span className="font-bold text-xl">{formatCurrency(totalAmount)}</span>
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5 text-center">
             <p className="text-sm font-semibold text-text">

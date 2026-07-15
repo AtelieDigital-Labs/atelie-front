@@ -41,6 +41,10 @@ export function useOrder(orderId?: number) {
     queryKey: ['order', orderId],
     queryFn: () => getOrderById(orderId!),
     enabled: !!orderId && !isNaN(orderId),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status
+      return status === 'PAID' || status === 'EXPIRED' ? false : 5000
+    },
   });
 }
 
