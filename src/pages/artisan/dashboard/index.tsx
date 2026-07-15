@@ -1,37 +1,17 @@
-import { useState, useEffect } from 'react'
 import { Package, Truck, DollarSign } from 'lucide-react'
 import { MetricCard } from './components/MetricCard'
 import { SalesChart } from './components/SalesChart'
 import { RecentProducts } from './components/RecentProducts'
 import { DashboardTabs } from '../components/DashboardTabs'
+import { useMyWallet } from '../../../hooks/accounts/useWallet'
 
 export function Dashboard() {
-  // Estado para o saldo, inicializado com o valor mockado
-  const [walletBalance, setWalletBalance] = useState('R$ 150,00')
+  const { data: wallet, isPending: isWalletPending } = useMyWallet()
 
+  const walletBalance = isWalletPending || !wallet
+    ? 'Carregando...'
+    : `R$ ${wallet.balance.toFixed(2).replace('.', ',')}`
 
-  useEffect(() => {
-    async function fetchWalletData() {
-      try {
-        // Quando a rota estiver pronta
-        // const { data } = await api.get('.../users/me/wallet')
-        // const formattedBalance = `R$ ${Number(data.balance).toFixed(2).replace('.', ',')}`
-        // setWalletBalance(formattedBalance)
-
-        // MOCK
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setWalletBalance('R$ 150,00')
-        
-      } catch (error) {
-        console.error('Erro ao buscar saldo da carteira:', error)
-        // Opcional: definir como 'R$ 0,00' ou manter o último valor conhecido em caso de erro
-      }
-    }
-
-    fetchWalletData()
-  }, [])
-
-  // Métricas com estado reativo
   const METRICS = [
     {
       label: 'Produtos Ativos',
