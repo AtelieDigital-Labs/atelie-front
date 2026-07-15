@@ -211,7 +211,7 @@ export function ArtisanOrderDetailPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[400px]">
               <thead>
-                <tr className="text-left text-xs text-text/50 border-b border-primary/10布">
+                <tr className="text-left text-xs text-text/50 border-b border-primary/10">
                   <th className="pb-2 font-medium">Produto / Variante</th>
                   <th className="pb-2 font-medium text-center">Qtd</th>
                   <th className="pb-2 font-medium text-right">Preço Unitário</th>

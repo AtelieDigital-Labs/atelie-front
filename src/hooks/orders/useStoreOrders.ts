@@ -4,7 +4,7 @@ import {
   getStoreOrder,
   updateStoreOrderStatus,
 } from "../../api/orders/storeOrders";
-import type { OrderArtisanStatusUpdate } from "../../schemas/order";
+import type { OrderStatus } from "../../schemas/order";
 
 export function useStoreOrders(page = 1, size = 50) {
   return useQuery({
@@ -13,11 +13,13 @@ export function useStoreOrders(page = 1, size = 50) {
   });
 }
 
-export function useStoreOrder(orderId: number) {
+export function useGetStoreOrder(orderId: string | number | undefined) {
+  const id = orderId ? Number(orderId) : undefined;
+
   return useQuery({
-    queryKey: ["store-order", orderId],
-    queryFn: () => getStoreOrder(orderId),
-    enabled: !!orderId,
+    queryKey: ["store-order", id],
+    queryFn: () => getStoreOrder(id!),
+    enabled: !!id,
   });
 }
 
@@ -27,11 +29,17 @@ export function useUpdateStoreOrderStatus() {
   return useMutation({
     mutationFn: ({
       orderId,
-      data,
+      status,
+      trackingCode,
     }: {
       orderId: number;
-      data: OrderArtisanStatusUpdate;
-    }) => updateStoreOrderStatus(orderId, data),
+      status: OrderStatus;
+      trackingCode?: string | null;
+    }) =>
+      updateStoreOrderStatus(orderId, {
+        status,
+        tracking_code: trackingCode ?? null,
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["store-orders"] });
       queryClient.invalidateQueries({ queryKey: ["store-order", variables.orderId] });
