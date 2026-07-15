@@ -17,8 +17,8 @@ export function OrderSummary({
   continueLabel = 'Continuar',
   loading = false,
 }: OrderSummaryProps) {
-  const total = subtotal + (shipping ?? 0)
-
+  
+  const total = subtotal + (+shipping ?? 0);
   return (
     <div className="bg-card rounded-2xl p-6 flex flex-col gap-4 w-full lg:w-80 lg:sticky lg:top-4">
       <h3 className="font-title text-lg text-primary font-bold">Resumo do Pedido</h3>
@@ -27,7 +27,10 @@ export function OrderSummary({
         <div className="flex items-center justify-between text-sm">
           <span className="text-text/60">Subtotal</span>
           <span className="font-medium">
-            R$ {subtotal.toFixed(2).replace('.', ',')}
+           {subtotal.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            })}
           </span>
         </div>
         <div className="flex items-center justify-between text-sm">
@@ -37,7 +40,10 @@ export function OrderSummary({
               ? 'A calcular'
               : shipping === 0
                 ? 'Grátis'
-                : `R$ ${shipping.toFixed(2).replace('.', ',')}`
+                : `R$ ${shipping.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            })}`
             }
           </span>
         </div>
@@ -46,7 +52,10 @@ export function OrderSummary({
       <div className="border-t border-primary/10 pt-3 flex items-center justify-between">
         <span className="font-semibold text-text">Total</span>
         <span className="text-xl text-primary font-bold">
-          R$ {total.toFixed(2).replace('.', ',')}
+           {total.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            })}
         </span>
       </div>
 

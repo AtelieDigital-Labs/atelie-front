@@ -141,7 +141,7 @@ export function ReviewList({ productId, variant, currentUserName }: ReviewListPr
   async function handleSubmitReview(rating: number, comment: string) {
     try {
       await reviewMutation.mutateAsync({
-        productId: 1,
+        productId: productId,
         review: {
           rating,
           comment,

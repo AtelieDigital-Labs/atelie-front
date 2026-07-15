@@ -250,9 +250,11 @@ export function ShippingPage() {
                       >
                         {option.total_price === 0
                           ? 'Grátis'
-                          : `R$ ${option.total_price
-                              .toFixed(2)
-                              .replace('.', ',')}`}
+                          : option.total_price
+                              .toLocaleString('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            })}
                       </span>
                     </div>
 
