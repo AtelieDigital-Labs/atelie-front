@@ -1,6 +1,7 @@
 // hooks/catalog/useProducts.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listProducts, getProduct, listProductsFavorites, listProductsSearch, updateProduct, createProduct } from "../../api/catalogs/products";
+import { listProducts, getProduct, listProductsFavorites, listProductsSearch, updateProduct, createProduct, deleteProduct } from "../../api/catalogs/products";
+
 
 
 export function useProducts() {
@@ -63,4 +64,15 @@ export function useProductsFavorites(ids: number[]) {
     queryFn: () => listProductsFavorites(ids),
     enabled: ids.length > 0,
   });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => deleteProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['store-products'] })
+    },
+  })
 }

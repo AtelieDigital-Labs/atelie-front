@@ -12,6 +12,7 @@ type ConfirmModalProps = {
   cancelText?: string
   variant?: 'danger' | 'warning' | 'info'
   isConfirming?: boolean
+  errorMessage?: string | null
 }
 
 export function ConfirmModal({
@@ -24,6 +25,7 @@ export function ConfirmModal({
   cancelText = 'Cancelar',
   variant = 'danger',
   isConfirming = false,
+  errorMessage = null
 }: ConfirmModalProps) {
   // Fecha com ESC
   useEffect(() => {
@@ -81,8 +83,14 @@ export function ConfirmModal({
           </h3>
 
           <p className="text-sm text-text/70 leading-relaxed">
-            {message}
+          {message}
           </p>
+
+           {errorMessage && (
+                <p className="text-sm text-danger bg-danger/10 rounded-lg px-3 py-2 mt-3 w-full">
+                {errorMessage}
+                </p>
+            )}
         </div>
 
         {/* Botões */}

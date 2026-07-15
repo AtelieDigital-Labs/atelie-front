@@ -53,3 +53,8 @@ export async function listProductsFavorites(productsIds: number[]){
 
   return data.products;
 }
+
+
+export async function deleteProduct(productId: number): Promise<void> {
+  await api.delete(`/api/v1/catalog/products/${productId}`);
+}

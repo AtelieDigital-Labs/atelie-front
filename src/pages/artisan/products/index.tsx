@@ -9,22 +9,26 @@ import { DashboardTabs } from '../components/DashboardTabs'
 import { ConfirmModal } from '../../../components/ui/ConfirmModal'
 import { useGetMeStoreProducts } from '../../../hooks/catalogs/useStores'
 import type { Product } from '../../../schemas/product'
+import {useDeleteProduct} from '../../../hooks/catalogs/useProducts'
+
 
 const ITEMS_PER_PAGE = 4
 
 export function ArtisanProducts() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   // Estados para o modal de exclusão
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  
 
   // Chamada da API usando React Query
   const { data: products = [], isPending, error } = useGetMeStoreProducts({
     enabled: true,
   })
+  const deleteProduct = useDeleteProduct()
 
   // Regra do React: Retornos de renderização condicional devem vir APÓS todos os hooks declarados
   if (isPending) {
@@ -61,23 +65,19 @@ export function ArtisanProducts() {
     setProductToDelete(null)
   }
 
-  async function handleConfirmDelete() {
+
+  function handleConfirmDelete() {
     if (!productToDelete) return
+    setDeleteError(null)
 
-    setIsDeleting(true)
-    try {
-      // Simulação de chamada de API
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      console.log('Produto excluído:', productToDelete.id)
-
-      handleCloseDeleteModal()
-      // TODO: toast.success('Produto excluído com sucesso!')
-    } catch (error) {
-      console.error('Erro ao excluir produto:', error)
-      // TODO: toast.error('Erro ao excluir produto.')
-    } finally {
-      setIsDeleting(false)
-    }
+    deleteProduct.mutate(productToDelete.id, {
+      onSuccess: () => handleCloseDeleteModal(),
+      onError: (error: any) => {
+        setDeleteError(
+          error?.response?.data?.detail ?? 'Erro ao excluir produto.'
+        )
+      },
+    })
   }
 
   // Configuração das Colunas da Tabela (Tipagem unificada em 'Product')
@@ -213,7 +213,8 @@ export function ArtisanProducts() {
         confirmText="Excluir"
         cancelText="Cancelar"
         variant="danger"
-        isConfirming={isDeleting}
+        isConfirming={deleteProduct.isPending}
+        errorMessage={deleteError}
       />
     </div>
   )
