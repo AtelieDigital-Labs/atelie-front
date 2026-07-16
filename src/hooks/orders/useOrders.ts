@@ -135,7 +135,7 @@ export function useUpdateStoreOrderStatus() {
       status: OrderStatus;
       trackingCode?: string | null;
     }) => {
-      const { data } = await api.patch(`/stores/orders/${orderId}/status`, {
+      const { data } = await api.patch(`/api/v1/stores/orders/${orderId}/status`, {
         status,
         tracking_code: trackingCode || undefined,
       });

@@ -4,7 +4,7 @@ const STATUS_LABELS: Record<OrderStatus, { label: string; className: string }> =
   PENDING: { label: 'PENDENTE', className: 'bg-warning/20 text-warning' },
   PAID: { label: 'PAGO', className: 'bg-success/20 text-success' },
   PROCESSING: { label: 'EM PROCESSAMENTO', className: 'bg-primary/20 text-primary' },
-  SHIPPED: { label: 'ENVIADO', className: 'bg-primary/20 text-primary' },
+  SHIPPED: { label: 'ENVIADO', className: 'bg-secondary/20 text-secondary' },
   DELIVERED: { label: 'ENTREGUE', className: 'bg-success/20 text-success' },
   EXPIRED: { label: 'EXPIRADO', className: 'bg-danger/20 text-danger' },
   REFUSED: { label: 'RECUSADO', className: 'bg-danger/20 text-danger' },

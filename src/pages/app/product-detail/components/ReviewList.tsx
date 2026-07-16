@@ -174,9 +174,9 @@ export function ReviewList({ productId, variant, currentUserName }: ReviewListPr
             distribution={distribution}
             onAddReview={() => setModalOpen(true)}
           />
-          <div className='flex flex-col gap-12'>
+          <div className='flex flex-col gap-12 flex-1 min-w-0'>
             <ReviewSummaryAI productId={productId} reviewCount={reviews.length} />  
-            <div className="flex flex-col gap-4 flex-1">
+            <div className="flex flex-col gap-4">
               {reviews.map(review => (
                 <ReviewCard key={review.id} review={review} />
               ))}

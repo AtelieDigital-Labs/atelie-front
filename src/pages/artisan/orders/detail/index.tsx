@@ -101,7 +101,7 @@ export function ArtisanOrderDetailPage() {
 
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-primary">Pedido #{order.order_id}</h2>
+          <h2 className="text-2xl font-bold text-primary font-body">Pedido #{order.order_id}</h2>
           <p className="text-xs text-text/50 mt-1">
             Criado em {new Date(order.created_at).toLocaleDateString('pt-BR')}{' '}
             às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
