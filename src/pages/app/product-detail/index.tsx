@@ -6,8 +6,9 @@ import { ReviewList } from './components/ReviewList'
 import { RelatedProducts } from './components/RelatedProducts'
 import {Button} from '../../../components/ui/Button'
 import { useProduct } from '../../../hooks/catalogs/useProducts'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {useAddCartItem} from '../../../hooks/orders/useCart'
+import { useGetStore } from '../../../hooks/catalogs/useStores'
 
 
 export function ProductDetail() {
@@ -21,6 +22,8 @@ export function ProductDetail() {
 
   const [selectedImage, setSelectedImage] = useState<any | null>(null);
   const [quantity, setQuantity] = useState(1);
+
+  const {data:store} = useGetStore(Number(data?.store_id))
   
   useEffect(() => {
     if (!data || selectedVariation) return;
@@ -93,12 +96,14 @@ if (!data || !selectedVariation) {
         <div className="flex flex-col gap-5">
 
           {/* Loja */}
+          <Link to={`/artisan/store/profile/${store?.id}`}>
           <div className="flex items-center gap-1.5 text-primary text-sm">
-            <Store size={14} />
+            <Store size={20} />
             <span className="font-semibold uppercase tracking-wide">
-              {data.shopName}
+              {store?.name}
             </span>
           </div>
+          </Link>
 
           {/* Nome + variação */}
           <h1 className="font-title text-3xl text-text leading-snug">

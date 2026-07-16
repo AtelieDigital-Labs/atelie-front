@@ -5,7 +5,7 @@ import type { Address, AddressCreate } from "../../schemas/user";
 
 export function useListAddresses() {
   return useQuery({
-    queryKey: ["list-addresses"],
+    queryKey: ["addresses"],
     queryFn: list_addreses,
   });
 }
@@ -15,15 +15,17 @@ export function useCreateAddress() {
 
   return useMutation({
     mutationFn: create_address,
-    onSuccess: (address) => {
-      queryClient.setQueryData(["address"], address);
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["addresses"], 
+      });
     },
   });
 }
 
 export function useGetAddresses(addressId: number) {
   return useQuery({
-    queryKey: ["get-address"],
+    queryKey: ["address", addressId],
     queryFn: () => get_address(addressId),
      enabled: !!addressId,
   });
@@ -41,9 +43,12 @@ export function useUpdateAddress() {
       data: AddressCreate;
     }) => update_address(data, id),
 
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["addresses"],
+        queryKey: ["address", data.id], 
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["addresses"], 
       });
     },
   });

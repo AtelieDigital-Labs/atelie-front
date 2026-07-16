@@ -123,7 +123,7 @@ export function ReviewList({ productId, variant, currentUserName }: ReviewListPr
   const {data:reviews=[]} = useReviews(productId)
   const reviewMutation = useCreateReview()
   // const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
-
+  const clients_ids = reviews.map(element => {element.id})
   // calcula a média e a distribuição a partir das reviews atuais
   const average = reviews.length > 0
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length

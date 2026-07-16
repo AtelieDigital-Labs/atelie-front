@@ -22,10 +22,10 @@ export function ReviewSummaryAI({ productId, reviewCount }: ReviewSummaryAIProps
   }
 
   // Se houver um erro de integração ou não houver conteúdo retornado pela API
-  // usamos o texto padrão de fallback que você definiu
-  const summaryContent = !error && summary?.content 
-    ? summary.content 
-    : "Não há dados suficientes para realizar uma análise confiável sobre a satisfação dos clientes."
+  // // usamos o texto padrão de fallback que você definiu
+  // const summaryContent = !error && summary?.content 
+  //   ? summary.content 
+  //   : "Não há dados suficientes para realizar uma análise confiável sobre a satisfação dos clientes."
 
   return (
     <div className="flex flex-col gap-2">
@@ -36,7 +36,7 @@ export function ReviewSummaryAI({ productId, reviewCount }: ReviewSummaryAIProps
 
       {/* Renderiza o conteúdo do resumo ou a mensagem padrão de fallback */}
       <p className="text-sm text-text/70 leading-relaxed">
-        {summaryContent}
+        {summary?.content}
       </p>
 
       <div className="flex items-center gap-1.5 text-xs text-primary/70 mt-1 font-bold">

@@ -122,18 +122,11 @@ export function StoreForm({ mode }: StoreFormProps) {
     }
   }
 
-  const createStoreMutation = useCreateStore({
-    onSuccess: () => navigate('/artisan/dashboard'),
-    onError: mapApiErrors,
-  })
+  const createStoreMutation = useCreateStore()
 
-  const updateStoreMutation = useUpdateStore({
-    onSuccess: () => navigate('/artisan/dashboard'),
-    onError: mapApiErrors,
-  })
-
+  const updateStoreMutation = useUpdateStore()
   // Popula o formulário quando carregar os dados da loja (modo edit)
-  useEffect(() => {
+  useEffect(() => { 
     if (mode !== 'edit') return
     if (isStoreLoading) return
 
@@ -247,12 +240,18 @@ export function StoreForm({ mode }: StoreFormProps) {
 
     if (isCreate) {
       const formData = buildCreateFormData(data as StoreCreate)
-      createStoreMutation.mutate(formData as never)
+      createStoreMutation.mutate(formData as never, {
+        onSuccess: () => navigate('/artisan/store/profile'),
+        onError: mapApiErrors,
+      })
       return
     }
 
     const formData = buildUpdateFormData(data as StoreUpdate)
-    updateStoreMutation.mutate(formData as never)
+    updateStoreMutation.mutate(formData as never, {
+      onSuccess: () => navigate('/artisan/store/profile'),
+      onError: mapApiErrors,
+    })
   }
 
   function onInvalid(formErrors: unknown) {
@@ -485,11 +484,11 @@ export function StoreForm({ mode }: StoreFormProps) {
           <Button
             type="button"
             variant="danger"
-            onClick={() => navigate('/artisan/dashboard')}
+            onClick={() => navigate(-1)}
           >
             Cancelar
           </Button>
-          <Button type="submit" variant="success" disabled={isSubmitting} onClick={() => navigate('/artisan/store/profile')}>
+          <Button type="submit" variant="success" disabled={isSubmitting} >
             {isSubmitting ? 'Salvando...' : isCreate ? 'Criar Loja' : 'Salvar Alterações'}
             
           </Button>

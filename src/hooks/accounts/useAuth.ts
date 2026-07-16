@@ -60,9 +60,7 @@ export function useLogout() {
       localStorage.removeItem('temp_access_token');
 
       // Define os dados do usuário no cache diretamente como null
-      // Isso força o Header (e qualquer componente que use "current-user") a atualizar na hora
       queryClient.setQueryData(["current-user"], null);
-      queryClient.clear();
     },
     onSuccess: () => {
       // Invalida para garantir que o estado limpo seja o oficial
@@ -77,8 +75,14 @@ export function useLogout() {
 }
 
 export function useGoogleLogin() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: { code: string }) =>
       api.post("/api/v1/accounts/login/google/", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["current-user"],
+      });
+    },
   });
 }
