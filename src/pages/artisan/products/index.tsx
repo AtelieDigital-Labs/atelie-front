@@ -155,7 +155,7 @@ export function ArtisanProducts() {
           <Link to={`/artisan/products/edit/${row.id}`}>
             <button
               aria-label="Editar"
-              className="text-warning hover:text-warning/70 cursor-pointer transition-colors"
+              className="inline-flex items-center justify-center p-1 text-warning hover:text-warning/70 cursor-pointer transition-colors"
             >
               <Pencil size={16} />
             </button>
@@ -163,7 +163,7 @@ export function ArtisanProducts() {
 
           <button
             aria-label="Excluir"
-            className="text-danger hover:text-danger-dark cursor-pointer transition-colors"
+            className="inline-flex items-center justify-center p-1 text-danger hover:text-danger-dark cursor-pointer transition-colors"
             onClick={() => handleOpenDeleteModal(row)}
           >
             <Trash2 size={16} />

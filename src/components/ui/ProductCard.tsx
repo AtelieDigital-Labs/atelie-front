@@ -46,7 +46,7 @@ export function ProductCard({ product, onRemoveFavorite, isOwner = false }: Prod
     <Link to={`/product/${product.id}`} className="flex flex-col flex-1">
   
       {/* Imagem */}
-      <div className="relative bg-surface aspect-square flex items-center justify-center">
+      <div className="relative bg-surface h-100 w-full flex items-center justify-center">
         {badge && (
           <span className="absolute top-3 left-3 bg-secondary text-white text-xs font-medium px-3 py-1 rounded-full">
             {badge}
