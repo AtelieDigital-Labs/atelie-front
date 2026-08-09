@@ -1,12 +1,10 @@
 
+import {Router} from './routes/index'
+
 function App() {
 
-
-  return (
-    <>
-     <h1>Ateliê Digital</h1>
-    </>
-  )
+  return <Router/>
+   
 }
 
 export default App
